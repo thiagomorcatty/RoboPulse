@@ -1,42 +1,42 @@
 @import "tailwindcss";
 
 /* ============================================
-   RoboPulse Design System
-   Palette inspired by the brand logo:
-   Cybernetic heart with blue/cyan pulse + silver/metallic
+   RoboPulse Design System - LIGHT MODE
+   Palette inspired by the RoboNuvem brand:
+   Vibrant blues, cloud whites and clean environment.
    ============================================ */
 
 @theme {
-  /* Brand Colors - Cyber Blue/Cyan Palette (from logo) */
-  --color-brand-50: #ecfeff;
-  --color-brand-100: #cffafe;
-  --color-brand-200: #a5f3fc;
-  --color-brand-300: #67e8f9;
-  --color-brand-400: #22d3ee;
-  --color-brand-500: #06b6d4;
-  --color-brand-600: #0891b2;
-  --color-brand-700: #0e7490;
-  --color-brand-800: #155e75;
-  --color-brand-900: #164e63;
+  /* Brand Colors - RoboNuvem Blue Palette */
+  --color-brand-50: #f0f9ff;
+  --color-brand-100: #e0f2fe;
+  --color-brand-200: #bae6fd;
+  --color-brand-300: #7dd3fc;
+  --color-brand-400: #38bdf8;
+  --color-brand-500: #0ea5e9;
+  --color-brand-600: #0284c7;
+  --color-brand-700: #0369a1;
+  --color-brand-800: #075985;
+  --color-brand-900: #0c4a6e;
 
-  /* Dark Surface Palette (deep navy, matching logo background) */
-  --color-surface-950: #070b14;
-  --color-surface-900: #0c1220;
-  --color-surface-800: #131b2e;
-  --color-surface-700: #1a2540;
-  --color-surface-600: #243352;
-  --color-surface-500: #334766;
-  --color-surface-400: #4a6080;
-  --color-surface-300: #6b84a3;
-  --color-surface-200: #9cb0c8;
-  --color-surface-100: #d0dbe8;
-  --color-surface-50: #eef2f7;
+  /* Light Surface Palette (Slate/Blue mix for a clean look) */
+  --color-surface-950: #f0f7ff; /* Primary Background - User requested light logo blue */
+  --color-surface-900: #ffffff; /* Secondary Background / Cards */
+  --color-surface-800: #e2e8f0; /* Borders */
+  --color-surface-700: #cbd5e1; /* Dividers */
+  --color-surface-600: #94a3b8; /* Muted Text icons */
+  --color-surface-500: #64748b; /* Secondary Text */
+  --color-surface-400: #475569; /* Body Text Secondary */
+  --color-surface-300: #334155; /* Body Text Primary */
+  --color-surface-200: #1e293b; /* Heading text */
+  --color-surface-100: #0f172a; /* Main Headings */
+  --color-surface-50: #020617;  /* Deepest Text */
 
   /* Accent Colors */
   --color-accent-amber: #f59e0b;
   --color-accent-rose: #f43f5e;
-  --color-accent-sky: #38bdf8;
-  --color-accent-cyan: #22d3ee;
+  --color-accent-sky: #0ea5e9;
+  --color-accent-cyan: #06b6d4;
   --color-accent-silver: #94a3b8;
 
   /* Typography */
@@ -66,8 +66,8 @@
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 15px rgba(6, 182, 212, 0.15); }
-  50% { box-shadow: 0 0 30px rgba(6, 182, 212, 0.3); }
+  0%, 100% { box-shadow: 0 0 15px rgba(14, 165, 233, 0.15); }
+  50% { box-shadow: 0 0 30px rgba(14, 165, 233, 0.3); }
 }
 
 /* ============================================
@@ -81,7 +81,7 @@ html {
 body {
   font-family: var(--font-sans);
   background-color: var(--color-surface-950);
-  color: var(--color-surface-100);
+  color: var(--color-surface-300);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -93,22 +93,22 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-surface-900);
+  background: var(--color-surface-950);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-surface-600);
+  background: var(--color-surface-800);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-surface-500);
+  background: var(--color-surface-700);
 }
 
 /* Selection */
 ::selection {
-  background-color: var(--color-brand-700);
-  color: white;
+  background-color: var(--color-brand-200);
+  color: var(--color-brand-900);
 }
 
 /* Focus Ring */

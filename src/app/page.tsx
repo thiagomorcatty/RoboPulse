@@ -6,113 +6,118 @@ import {
   Calendar,
   ArrowRight,
   Shield,
+  Zap,
 } from "lucide-react";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-surface-950 flex flex-col">
+    <div className="min-h-screen bg-surface-950 flex flex-col font-sans">
       {/* Header */}
-      <header className="border-b border-surface-700/30 backdrop-blur-md bg-surface-950/80 sticky top-0 z-50">
+      <header className="border-b border-surface-800/50 backdrop-blur-md bg-surface-950/80 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image
-              src="/logo.png"
-              alt="RoboPulse"
-              width={36}
-              height={36}
-              className="rounded-lg"
-            />
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm">
+              <Image
+                src="/logo.png"
+                alt="RoboPulse"
+                width={40}
+                height={40}
+                className="object-cover"
+              />
+            </div>
             <span className="text-xl font-bold tracking-tight">
               <span className="text-surface-100">Robo</span>
-              <span className="text-brand-400">Pulse</span>
+              <span className="text-brand-600">Pulse</span>
             </span>
           </div>
-          <Link
-            href="/dashboard"
-            className="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-brand-600/25"
-          >
-            Entrar no Painel
-          </Link>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/dashboard"
+              className="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-brand-600/20 active:scale-95"
+            >
+              Entrar no Painel
+            </Link>
+          </div>
         </div>
       </header>
 
       {/* Hero */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-24">
-        <div className="text-center max-w-3xl mx-auto animate-[fade-in_0.5s_ease-out]">
-          {/* Logo grande central */}
-          <div className="w-28 h-28 mx-auto mb-8 animate-[glow_3s_ease-in-out_infinite] rounded-2xl overflow-hidden">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-20">
+        <div className="text-center max-w-4xl mx-auto animate-[fade-in_0.5s_ease-out]">
+          {/* Logo central com sombra suave */}
+          <div className="w-32 h-32 mx-auto mb-10 rounded-3xl overflow-hidden shadow-2xl shadow-brand-600/20 ring-4 ring-white">
             <Image
               src="/logo.png"
               alt="RoboPulse Logo"
-              width={112}
-              height={112}
+              width={128}
+              height={128}
               className="object-cover"
               priority
             />
           </div>
 
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-600/10 border border-brand-600/20 text-brand-400 text-sm font-medium mb-8">
-            <Bot className="w-4 h-4" />
-            Automação com Inteligência Artificial
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-100 border border-brand-200 text-brand-700 text-sm font-bold mb-8 uppercase tracking-wider">
+            <Zap className="w-4 h-4 fill-brand-600 text-brand-600" />
+            Inteligência Artificial para Negócios
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-extrabold text-surface-50 leading-tight tracking-tight">
+          <h1 className="text-5xl md:text-7xl font-black text-surface-100 leading-[1.1] tracking-tight">
             Atendimento WhatsApp
-            <span className="block bg-gradient-to-r from-brand-300 via-brand-400 to-accent-sky bg-clip-text text-transparent">
-              100% Automatizado
+            <span className="block bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent">
+              Integrado e Automático
             </span>
           </h1>
 
-          <p className="mt-6 text-lg text-surface-300 leading-relaxed max-w-2xl mx-auto">
-            Treine a IA com os documentos do seu negócio e deixe o robô atender
-            os seus clientes 24 horas por dia. Agende reuniões automaticamente
-            no Google Calendar.
+          <p className="mt-8 text-xl text-surface-400 leading-relaxed max-w-2xl mx-auto font-medium">
+            Automatize o atendimento da sua empresa com IA. 
+            Treine o seu robô com documentos reais e agende reuniões 
+            diretamente no seu calendário.
           </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-5">
             <Link
               href="/dashboard"
-              className="group flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-xl hover:shadow-brand-600/30"
+              className="group flex items-center gap-2 px-10 py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold text-lg rounded-2xl transition-all duration-300 shadow-xl shadow-brand-600/30 hover:-translate-y-1"
             >
-              Começar Agora
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              Começar Agora Gratuitamente
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>
 
         {/* Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-20 animate-[slide-up_0.6s_ease-out]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-24 animate-[slide-up_0.6s_ease-out]">
           {[
             {
               icon: MessageSquare,
-              title: "Inbox Centralizada",
+              title: "Inbox em Tempo Real",
               description:
-                "Veja todas as conversas em tempo real. Desligue o robô quando quiser e assuma o atendimento.",
+                "Controle total sobre as suas conversas. Acompanhe o robô ou assuma o controlo imediato do atendimento.",
             },
             {
               icon: Shield,
-              title: "Multi-Perfis",
+              title: "Segmentos Customizados",
               description:
-                "Configure perfis diferentes para cada negócio: contabilidade, seguros, imobiliária.",
+                "IA treinada especificamente para o seu nicho: Imobiliária, Seguros, Contabilidade e muito mais.",
             },
             {
               icon: Calendar,
-              title: "Agendamento Automático",
+              title: "Agendamento Inteligente",
               description:
-                "A IA agenda reuniões directamente no Google Calendar quando o cliente está pronto.",
+                "Converta contactos em reuniões automaticamente usando a integração oficial com o Google Calendar.",
             },
           ].map((feature) => (
             <div
               key={feature.title}
-              className="group p-6 rounded-2xl bg-surface-900/60 border border-surface-700/30 hover:border-brand-600/30 transition-all duration-300 hover:bg-surface-800/40"
+              className="group p-8 rounded-3xl bg-white border border-surface-800/80 hover:border-brand-300 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-brand-600/5 hover:-translate-y-1"
             >
-              <div className="w-11 h-11 rounded-xl bg-brand-600/10 flex items-center justify-center mb-4 group-hover:bg-brand-600/20 transition-colors">
-                <feature.icon className="w-5 h-5 text-brand-400" />
+              <div className="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center mb-6 group-hover:bg-brand-100 transition-colors">
+                <feature.icon className="w-7 h-7 text-brand-600" />
               </div>
-              <h3 className="text-lg font-semibold text-surface-50 mb-2">
+              <h3 className="text-xl font-bold text-surface-100 mb-3">
                 {feature.title}
               </h3>
-              <p className="text-sm text-surface-400 leading-relaxed">
+              <p className="text-surface-500 leading-relaxed font-medium">
                 {feature.description}
               </p>
             </div>
@@ -121,16 +126,23 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-surface-700/30 py-6">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-center gap-3 text-sm text-surface-500">
-          <Image
-            src="/logo.png"
-            alt="RoboPulse"
-            width={20}
-            height={20}
-            className="rounded-sm opacity-60"
-          />
-          © {new Date().getFullYear()} RoboPulse. Todos os direitos reservados.
+      <footer className="border-t border-surface-800/50 py-10 bg-white/50">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/logo.png"
+              alt="RoboPulse"
+              width={24}
+              height={24}
+              className="rounded-lg shadow-sm"
+            />
+            <span className="font-bold text-surface-200">RoboPulse © {new Date().getFullYear()}</span>
+          </div>
+          <div className="flex items-center gap-8 text-sm font-semibold text-surface-500">
+            <Link href="#" className="hover:text-brand-600 transition-colors">Privacidade</Link>
+            <Link href="#" className="hover:text-brand-600 transition-colors">Termos de Uso</Link>
+            <Link href="#" className="hover:text-brand-600 transition-colors">Suporte</Link>
+          </div>
         </div>
       </footer>
     </div>

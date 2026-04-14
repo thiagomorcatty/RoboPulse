@@ -11,6 +11,7 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -52,17 +53,17 @@ export default function DashboardLayout({
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen bg-surface-950 flex">
+    <div className="min-h-screen bg-surface-950 flex font-sans">
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 h-full bg-surface-900/80 backdrop-blur-xl border-r border-surface-700/30 flex flex-col z-40 transition-all duration-300",
-          collapsed ? "w-[72px]" : "w-64"
+          "fixed left-0 top-0 h-full bg-white border-r border-surface-800 flex flex-col z-40 transition-all duration-300 shadow-xl shadow-brand-900/5",
+          collapsed ? "w-[76px]" : "w-64"
         )}
       >
         {/* Logo */}
-        <div className="h-16 border-b border-surface-700/30 flex items-center px-4 gap-3">
-          <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+        <div className="h-20 border-b border-surface-800 flex items-center px-4 gap-3 bg-white">
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 shadow-sm ring-1 ring-surface-800">
             <Image
               src="/logo.png"
               alt="RoboPulse"
@@ -72,12 +73,11 @@ export default function DashboardLayout({
             />
           </div>
           {!collapsed && (
-            <div className="flex flex-col">
-              <span className="text-base font-bold tracking-tight whitespace-nowrap">
-                <span className="text-surface-200">Robo</span>
-                <span className="text-brand-400">Pulse</span>
+            <div className="flex flex-col animate-[fade-in_0.2s_ease-out]">
+              <span className="text-base font-bold tracking-tight whitespace-nowrap text-surface-200">
+                Robo<span className="text-brand-600">Pulse</span>
               </span>
-              <span className="text-[10px] text-surface-500 -mt-0.5">
+              <span className="text-[10px] text-surface-500 font-bold uppercase tracking-wider -mt-0.5">
                 Automação WhatsApp
               </span>
             </div>
@@ -85,7 +85,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 px-3 space-y-1">
+        <nav className="flex-1 py-6 px-3 space-y-1.5 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -96,37 +96,55 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                  "flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-bold transition-all duration-200 group relative",
                   isActive
-                    ? "bg-brand-600/15 text-brand-400 shadow-sm shadow-brand-600/10"
-                    : "text-surface-400 hover:text-surface-200 hover:bg-surface-800/60"
+                    ? "bg-brand-50 text-brand-600 shadow-sm shadow-brand-600/5"
+                    : "text-surface-500 hover:text-brand-600 hover:bg-brand-50/50"
                 )}
                 title={collapsed ? item.label : undefined}
               >
                 <item.icon
                   className={cn(
-                    "w-5 h-5 flex-shrink-0",
-                    isActive ? "text-brand-400" : "text-surface-500"
+                    "w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110",
+                    isActive ? "text-brand-600" : "text-surface-600 group-hover:text-brand-500"
                   )}
                 />
                 {!collapsed && <span>{item.label}</span>}
+                {isActive && !collapsed && (
+                  <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-brand-600" />
+                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Collapse Toggle */}
-        <div className="p-3 border-t border-surface-700/30">
+        {/* User Info & Collapse */}
+        <div className="p-4 border-t border-surface-800 bg-surface-950/20">
+          {!collapsed && (
+            <div className="mb-4 px-2 py-3 rounded-xl bg-white border border-surface-800 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white text-xs font-bold">
+                AD
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs font-bold text-surface-100 truncate">Admin</span>
+                <span className="text-[10px] text-surface-500 truncate">Sair do sistema</span>
+              </div>
+              <button className="ml-auto text-surface-400 hover:text-accent-rose transition-colors">
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-surface-500 hover:text-surface-300 hover:bg-surface-800/60 transition-all duration-200 text-sm"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-surface-500 hover:text-brand-600 hover:bg-white transition-all duration-200 text-sm font-bold"
           >
             {collapsed ? (
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-5 h-5" />
             ) : (
               <>
                 <ChevronLeft className="w-4 h-4" />
-                <span>Recolher</span>
+                <span>Recolher Menu</span>
               </>
             )}
           </button>
@@ -136,23 +154,31 @@ export default function DashboardLayout({
       {/* Main Content */}
       <main
         className={cn(
-          "flex-1 transition-all duration-300",
-          collapsed ? "ml-[72px]" : "ml-64"
+          "flex-1 transition-all duration-300 min-h-screen",
+          collapsed ? "ml-[76px]" : "ml-64"
         )}
       >
         {/* Top Bar */}
-        <header className="h-16 border-b border-surface-700/30 bg-surface-950/80 backdrop-blur-md sticky top-0 z-30 flex items-center px-8">
-          <h2 className="text-sm font-medium text-surface-400">
-            {navItems.find(
-              (item) =>
-                pathname === item.href ||
-                (item.href !== "/dashboard" && pathname.startsWith(item.href))
-            )?.label || "Dashboard"}
-          </h2>
+        <header className="h-20 border-b border-surface-800 bg-white/70 backdrop-blur-xl sticky top-0 z-30 flex items-center px-10 justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-surface-100">
+              {navItems.find(
+                (item) =>
+                  pathname === item.href ||
+                  (item.href !== "/dashboard" && pathname.startsWith(item.href))
+              )?.label || "Dashboard"}
+            </h2>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="px-3 py-1.5 rounded-lg bg-accent-amber/10 border border-accent-amber/20 text-[10px] font-bold text-accent-amber uppercase tracking-wider">
+              Plano Premium
+            </div>
+          </div>
         </header>
 
         {/* Page Content */}
-        <div className="p-8">{children}</div>
+        <div className="p-10 max-w-[1600px] mx-auto">{children}</div>
       </main>
     </div>
   );
