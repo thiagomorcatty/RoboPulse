@@ -1,0 +1,212 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [vector]
+}
+
+// ============================================
+// Admin Users (Quem acede ao painel)
+// ============================================
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenants       TenantUser[]
+  sentMessages  Message[]     @relation("SentByUser")
+
+  @@map("users")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  AGENT
+}
+
+// ============================================
+// Tenants (Perfis de Cliente / Negócios)
+// ============================================
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String                         // Ex: "Imobiliária Lisboa", "Contabilista PT"
+  slug        String   @unique               // URL-friendly identifier
+  segment     String                         // Ex: "imobiliária", "contabilidade", "seguros"
+  description String?                        // Breve descrição do negócio
+  systemPrompt String  @db.Text              // Prompt base para o Gemini (persona da IA)
+  whatsappPhoneId  String?                   // Phone Number ID (WhatsApp Cloud API)
+  whatsappToken    String?                   // Token de acesso permanente da Meta
+  calendarId       String?                   // Google Calendar ID associado
+  calendarOAuth    Json?                     // Tokens OAuth do Google Calendar
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users          TenantUser[]
+  contacts       Contact[]
+  conversations  Conversation[]
+  documents      Document[]
+  embeddings     DocumentEmbedding[]
+
+  @@map("tenants")
+}
+
+model TenantUser {
+  id       String @id @default(cuid())
+  userId   String
+  tenantId String
+  role     TenantRole @default(MEMBER)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
+  @@map("tenant_users")
+}
+
+enum TenantRole {
+  OWNER
+  MEMBER
+}
+
+// ============================================
+// Contacts (Clientes Finais do WhatsApp)
+// ============================================
+model Contact {
+  id          String   @id @default(cuid())
+  tenantId    String
+  waId        String                         // WhatsApp ID (número do telefone)
+  name        String?                        // Nome do contacto
+  email       String?
+  tags        String[]                       // Tags para segmentação futura
+  metadata    Json?                          // Dados extras do contacto
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+
+  @@unique([tenantId, waId])
+  @@map("contacts")
+}
+
+// ============================================
+// Conversations (Sessões de Conversa)
+// ============================================
+model Conversation {
+  id          String   @id @default(cuid())
+  tenantId    String
+  contactId   String
+  status      ConversationStatus @default(ACTIVE)
+  botEnabled  Boolean  @default(true)         // true = robô responde, false = humano
+  summary     String?  @db.Text              // Resumo gerado pela IA
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact  Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@map("conversations")
+}
+
+enum ConversationStatus {
+  ACTIVE
+  CLOSED
+  WAITING_HUMAN
+  SCHEDULED
+}
+
+// ============================================
+// Messages (Mensagens Individuais)
+// ============================================
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  direction      MessageDirection
+  content        String   @db.Text
+  messageType    MessageType @default(TEXT)
+  waMessageId    String?  @unique            // ID da mensagem no WhatsApp (para tracking)
+  sentByUserId   String?                     // Preenchido se foi humano
+  metadata       Json?                       // Dados extras (mídia, botões, etc.)
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sentByUser   User?        @relation("SentByUser", fields: [sentByUserId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+enum MessageDirection {
+  INBOUND   // Cliente -> Robô/Humano
+  OUTBOUND  // Robô/Humano -> Cliente
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  DOCUMENT
+  AUDIO
+  VIDEO
+  LOCATION
+  TEMPLATE
+  INTERACTIVE
+}
+
+// ============================================
+// Knowledge Base (Documentos de Referência)
+// ============================================
+model Document {
+  id         String   @id @default(cuid())
+  tenantId   String
+  title      String
+  fileName   String
+  fileUrl    String                          // URL do ficheiro armazenado (Vercel Blob)
+  fileType   String                          // "pdf", "docx", "txt"
+  fileSize   Int                             // Tamanho em bytes
+  status     DocumentStatus @default(PENDING)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  embeddings DocumentEmbedding[]
+
+  @@map("documents")
+}
+
+enum DocumentStatus {
+  PENDING     // Aguardando processamento
+  PROCESSING  // A gerar embeddings
+  READY       // Pronto para consulta RAG
+  ERROR       // Falha no processamento
+}
+
+// ============================================
+// Document Embeddings (Vetores para RAG)
+// ============================================
+model DocumentEmbedding {
+  id         String   @id @default(cuid())
+  tenantId   String
+  documentId String
+  content    String   @db.Text              // Fragmento do texto original
+  embedding  Unsupported("vector(768)")     // Gemini Embedding Model output dimension
+  metadata   Json?                          // Posição no doc, página, etc.
+  createdAt  DateTime @default(now())
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("document_embeddings")
+}
