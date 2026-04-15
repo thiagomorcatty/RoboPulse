@@ -27,12 +27,14 @@ model User {
   email       String   @unique
   name        String
   firebaseUid String   @unique
-  whatsapp    String?
+  phoneNumber String?
+  darkMode    Boolean  @default(false)
   role        Role     @default(ADMIN)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   tenants       TenantUser[]
+  contacts      Contact[]
   sentMessages  Message[]     @relation("SentByUser")
 
   @@map("users")
@@ -48,6 +50,8 @@ model Tenant {
   segment     String                         // Ex: "imobiliária", "contabilidade", "seguros"
   description String?                        // Breve descrição do negócio
   systemPrompt String  @db.Text              // Prompt base para o Gemini (persona da IA)
+  temperature  Float   @default(0.7)         // Nível de criatividade da IA
+  geminiKey    String?                       // Chave de API individual por perfil
   whatsappPhoneId  String?                   // Phone Number ID (WhatsApp Cloud API)
   whatsappToken    String?                   // Token de acesso permanente da Meta
   calendarId       String?                   // Google Calendar ID associado
@@ -88,7 +92,8 @@ enum TenantRole {
 // ============================================
 model Contact {
   id          String   @id @default(cuid())
-  tenantId    String
+  userId      String                         // Dono do contacto (Global para todos os perfis do utilizador)
+  tenantId    String?                        // Último perfil usado (opcional)
   waId        String                         // WhatsApp ID (número do telefone)
   name        String?                        // Nome do contacto
   email       String?
@@ -97,10 +102,11 @@ model Contact {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant        Tenant?        @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   conversations Conversation[]
 
-  @@unique([tenantId, waId])
+  @@unique([userId, waId])
   @@map("contacts")
 }
 

@@ -13,7 +13,11 @@ import {
   ChevronRight,
   LogOut,
   UserPlus,
-  User,
+  UserCircle,
+  BookOpen,
+  Link as LinkIcon,
+  Contact2,
+  ChevronDown
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -36,9 +40,24 @@ const navItems = [
     icon: MessageSquare,
   },
   {
-    label: "Perfil (IA)",
-    href: "/dashboard/profile",
-    icon: User,
+    label: "Contatos",
+    href: "/dashboard/contacts",
+    icon: Contact2,
+  },
+  {
+    label: "Perfil do Atendente",
+    href: "/dashboard/persona",
+    icon: UserCircle,
+  },
+  {
+    label: "Base de Conhecimento",
+    href: "/dashboard/knowledge",
+    icon: BookOpen,
+  },
+  {
+    label: "Integrações",
+    href: "/dashboard/integrations",
+    icon: LinkIcon,
   },
   {
     label: "Lista de Usuários",
@@ -51,14 +70,14 @@ const navItems = [
     icon: UserPlus,
   },
   {
-    label: "Base de Conhecimento",
-    href: "/dashboard/knowledge",
-    icon: Brain,
+    label: "Definições", // Sistema para Admin, Pessoal para User
+    href: "/dashboard/settings", 
+    icon: Settings,
   },
   {
-    label: "Definições",
-    href: "/dashboard/settings",
-    icon: Settings,
+    label: "Minha Conta",
+    href: "/dashboard/account",
+    icon: UserCircle,
   },
 ];
 
@@ -76,15 +95,17 @@ export default function DashboardLayout({
   const isAdmin = dbUser?.role === "ADMIN" || dbUser?.role === "SUPER_ADMIN";
   
   const filteredNavItems = navItems.filter((item) => {
-    // Itens exclusivos do Admin
-    if (["Usuários", "Novo Usuário", "Definições"].includes(item.label)) {
+    // Itens exclusivos do Admin (Gestão de Sistema e Outros Usuários)
+    if (["Lista de Usuários", "Cadastro de Usuários"].includes(item.label)) {
       return isAdmin;
     }
-    // Itens exclusivos do Usuário/Agente
-    if (["Conversas", "Perfil (IA)", "Base de Conhecimento"].includes(item.label)) {
+
+    // Itens exclusivos do Usuário (Operação e Configuração Pessoal)
+    if (["Conversas", "Contatos", "Perfil do Atendente", "Base de Conhecimento", "Integrações", "Minha Conta"].includes(item.label)) {
       return !isAdmin;
     }
-    // Dashboard aparece para todos
+
+    // Dashboard e Definições aparecem para todos (embora o conteúdo de Definições mude internamente)
     return true;
   });
 
@@ -212,7 +233,7 @@ export default function DashboardLayout({
       >
         {/* Top Bar */}
         <header className="h-20 border-b border-surface-800 bg-white/70 backdrop-blur-xl sticky top-0 z-30 flex items-center px-10 justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-6">
             <h2 className="text-base font-bold text-surface-100">
               {navItems.find(
                 (item) =>
@@ -220,11 +241,52 @@ export default function DashboardLayout({
                   (item.href !== "/dashboard" && pathname.startsWith(item.href))
               )?.label || "Dashboard"}
             </h2>
+
+            {/* Profile Switcher (Apenas para Usuários) */}
+            {!isAdmin && dbUser?.tenants && dbUser.tenants.length > 0 && (
+              <div className="flex items-center gap-2 pl-6 border-l border-surface-800">
+                <span className="text-[10px] font-black uppercase tracking-widest text-surface-400">Atendente:</span>
+                <div className="relative group">
+                  <button className="flex items-center gap-2 px-3 py-1.5 bg-brand-50 border border-brand-200 rounded-lg text-xs font-bold text-brand-600 hover:bg-brand-100 transition-all">
+                    {activeTenant?.name || "Selecionar Perfil"}
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                  
+                  {/* Dropdown Menu */}
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-surface-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-1.5">
+                    {dbUser.tenants.map((tu: any) => (
+                      <button
+                        key={tu.tenant.id}
+                        onClick={() => {
+                          const { setActiveTenant } = require("@/context/auth-context").useAuth();
+                          setActiveTenant(tu.tenant);
+                        }}
+                        className={cn(
+                          "w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors",
+                          activeTenant?.id === tu.tenant.id 
+                            ? "bg-brand-50 text-brand-600" 
+                            : "text-surface-600 hover:bg-surface-950/20"
+                        )}
+                      >
+                        {tu.tenant.name}
+                      </button>
+                    ))}
+                    <div className="h-px bg-surface-800 my-1" />
+                    <Link
+                      href="/dashboard/persona"
+                      className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
+                    >
+                      + Criar Novo Perfil
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="flex items-center gap-4">
             <div className="px-3 py-1.5 rounded-lg bg-accent-amber/10 border border-accent-amber/20 text-[10px] font-bold text-accent-amber uppercase tracking-wider">
-              Plano Premium
+              {isAdmin ? "Painel Admin" : "Plano Premium"}
             </div>
           </div>
         </header>

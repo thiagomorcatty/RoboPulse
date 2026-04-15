@@ -16,9 +16,16 @@ export async function GET() {
     const decodedToken = await adminAuth.verifyIdToken(session);
     const email = decodedToken.email;
 
-    // 2. Buscar no Prisma
+    // 2. Buscar no Prisma trazendo os perfis vinculados
     const user = await prisma.user.findUnique({
       where: { email },
+      include: {
+        tenants: {
+          include: {
+            tenant: true
+          }
+        }
+      }
     });
 
     if (!user) {
