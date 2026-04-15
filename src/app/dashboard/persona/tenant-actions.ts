@@ -13,7 +13,7 @@ export async function updateTenant(id: string, data: any) {
         segment: data.segment,
         description: data.description,
         systemPrompt: data.systemPrompt,
-        temperature: data.temperature ? parseFloat(data.temperature) : undefined,
+        temperature: data.temperature !== undefined ? parseFloat(data.temperature.toString()) : 0.7,
         geminiKey: data.geminiKey,
         whatsappPhoneId: data.whatsappPhoneId,
         whatsappToken: data.whatsappToken,

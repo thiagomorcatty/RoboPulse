@@ -25,7 +25,14 @@ const segmentColors: Record<string, string> = {
 export default async function TenantsPage() {
   const tenants = await prisma.tenant.findMany({
     orderBy: { createdAt: "desc" },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      segment: true,
+      description: true,
+      isActive: true,
+      createdAt: true,
       _count: {
         select: {
           contacts: true,
