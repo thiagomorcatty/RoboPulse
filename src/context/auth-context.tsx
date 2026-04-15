@@ -6,16 +6,19 @@ import { auth } from "@/lib/firebase";
 
 interface AuthContextType {
   user: FirebaseUser | null;
+  dbUser: any | null;
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  dbUser: null,
   loading: true,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [dbUser, setDbUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,8 +27,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+      if (user) {
+        try {
+          const res = await fetch("/api/auth/me");
+          if (res.ok) {
+            const data = await res.json();
+            setDbUser(data);
+          }
+        } catch (err) {
+          console.error("Erro ao carregar perfil do banco:", err);
+        }
+      } else {
+        setDbUser(null);
+      }
       setLoading(false);
     });
 
@@ -33,7 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, dbUser, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
