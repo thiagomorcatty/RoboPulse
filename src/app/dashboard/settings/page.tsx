@@ -1,120 +1,107 @@
-import { Settings, MessageCircle, Calendar, Key } from "lucide-react";
+import { Shield, Server, Database, Activity, Layout, Globe } from "lucide-react";
 
 export default function SettingsPage() {
   return (
-    <div className="space-y-6 animate-[fade-in_0.3s_ease-out]">
+    <div className="space-y-8 animate-[fade-in_0.3s_ease-out]">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-surface-50">Definições</h1>
-        <p className="text-surface-400 mt-1">
-          Configurar integrações e preferências do sistema.
+        <h1 className="text-3xl font-black text-surface-100 tracking-tight">
+          Definições do <span className="text-brand-600">Sistema</span>
+        </h1>
+        <p className="text-surface-500 font-medium">
+          Gerencie os parâmetros globais da plataforma RoboPulse
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* WhatsApp Config */}
-        <div className="rounded-2xl bg-surface-900/60 border border-surface-800/50 p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-green-600/10 flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-green-400" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* System Health */}
+        <div className="bg-white border border-surface-800 rounded-[2rem] p-8 shadow-sm space-y-6">
+          <div className="flex items-center gap-3 pb-2 border-b border-surface-800">
+            <Activity className="w-5 h-5 text-accent-indigo" />
+            <h2 className="text-lg font-black text-surface-100 uppercase tracking-tight">Estado do Servidor</h2>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-surface-950/20 border border-surface-800 rounded-2xl">
+              <div className="flex items-center gap-3">
+                <Database className="w-4 h-4 text-brand-600" />
+                <span className="text-sm font-bold text-surface-100">Banco de Dados (Neon)</span>
+              </div>
+              <span className="px-2 py-1 bg-green-500/10 text-green-600 text-[10px] font-black uppercase rounded-lg">Online</span>
             </div>
-            <div>
-              <h3 className="text-base font-semibold text-surface-50">
-                WhatsApp Cloud API
-              </h3>
-              <p className="text-xs text-surface-500">
-                Configuração da API oficial da Meta.
-              </p>
+            
+            <div className="flex items-center justify-between p-4 bg-surface-950/20 border border-surface-800 rounded-2xl">
+              <div className="flex items-center gap-3">
+                <Shield className="w-4 h-4 text-accent-amber" />
+                <span className="text-sm font-bold text-surface-100">Autenticação (Firebase)</span>
+              </div>
+              <span className="px-2 py-1 bg-green-500/10 text-green-600 text-[10px] font-black uppercase rounded-lg">Estável</span>
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-surface-950/20 border border-surface-800 rounded-2xl">
+              <div className="flex items-center gap-3">
+                <Server className="w-4 h-4 text-surface-400" />
+                <span className="text-sm font-bold text-surface-100">Storage (Vercel Blob)</span>
+              </div>
+              <span className="px-2 py-1 bg-green-500/10 text-green-600 text-[10px] font-black uppercase rounded-lg">Ativo</span>
             </div>
           </div>
+        </div>
+
+        {/* Branding & Platform */}
+        <div className="bg-white border border-surface-800 rounded-[2rem] p-8 shadow-sm space-y-6">
+          <div className="flex items-center gap-3 pb-2 border-b border-surface-800">
+            <Layout className="w-5 h-5 text-brand-600" />
+            <h2 className="text-lg font-black text-surface-100 uppercase tracking-tight">Marca e Identidade</h2>
+          </div>
+          
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-surface-300 mb-1.5">
-                Verify Token
-              </label>
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-surface-400 ml-1">Nome da Plataforma</label>
               <input
-                type="text"
-                placeholder="Token de verificação do webhook"
-                className="w-full px-4 py-2.5 bg-surface-800/60 border border-surface-700/30 rounded-xl text-sm text-surface-200 placeholder-surface-500 focus:outline-none focus:border-brand-600/50 transition-colors"
+                defaultValue="RoboPulse"
+                className="w-full px-4 py-3 bg-surface-950/20 border border-surface-800 rounded-xl text-surface-100 font-medium focus:ring-2 focus:ring-brand-600/20 transition-all font-sans"
               />
             </div>
-            <p className="text-xs text-surface-600">
-              Os tokens de acesso por número do WhatsApp são configurados em cada Perfil.
-            </p>
+            
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-surface-400 ml-1">Cor Primária (HEX)</label>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-600 border border-surface-800" />
+                <input
+                  defaultValue="#0F62FE"
+                  className="flex-1 px-4 py-2.5 bg-surface-950/20 border border-surface-800 rounded-xl text-surface-100 font-mono uppercase focus:ring-2 focus:ring-brand-600/20 transition-all"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Google Calendar Config */}
-        <div className="rounded-2xl bg-surface-900/60 border border-surface-800/50 p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-accent-sky/10 flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-accent-sky" />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-surface-50">
-                Google Calendar
-              </h3>
-              <p className="text-xs text-surface-500">
-                Integração para agendamento automático de reuniões.
-              </p>
-            </div>
+        {/* Global Policies */}
+        <div className="lg:col-span-2 bg-white border border-surface-800 rounded-[2rem] p-8 shadow-sm space-y-6">
+          <div className="flex items-center gap-3 pb-2 border-b border-surface-800">
+            <Globe className="w-5 h-5 text-accent-rose" />
+            <h2 className="text-lg font-black text-surface-100 uppercase tracking-tight">Políticas Globais</h2>
           </div>
-          <button className="w-full px-4 py-2.5 bg-surface-800/60 border border-surface-700/30 hover:border-accent-sky/30 rounded-xl text-sm text-surface-300 hover:text-accent-sky transition-all duration-200">
-            Conectar Google Calendar
-          </button>
-        </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-4 bg-surface-950/10 border border-surface-800 rounded-2xl space-y-2">
+              <h4 className="text-xs font-black text-surface-100 uppercase tracking-wide">Limites de Mensagens</h4>
+              <p className="text-xs text-surface-500 font-medium">Resetar contagem de mensagens a cada 24h em todos os perfis.</p>
+              <button className="text-[10px] font-black text-brand-600 uppercase pt-2">Ativado</button>
+            </div>
+            
+            <div className="p-4 bg-surface-950/10 border border-surface-800 rounded-2xl space-y-2">
+              <h4 className="text-xs font-black text-surface-100 uppercase tracking-wide">Novos Registros</h4>
+              <p className="text-xs text-surface-500 font-medium font-sans">Permitir que novos admins sejam criados apenas por Super Admins.</p>
+              <button className="text-[10px] font-black text-brand-600 uppercase pt-2">Ativado</button>
+            </div>
 
-        {/* Gemini API Config */}
-        <div className="rounded-2xl bg-surface-900/60 border border-surface-800/50 p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-accent-amber/10 flex items-center justify-center">
-              <Key className="w-5 h-5 text-accent-amber" />
+            <div className="p-4 bg-surface-950/10 border border-surface-800 rounded-2xl space-y-2">
+              <h4 className="text-xs font-black text-surface-100 uppercase tracking-wide">Modo de Manutenção</h4>
+              <p className="text-xs text-surface-500 font-medium font-sans">Suspender temporariamente o processamento de mensagens.</p>
+              <button className="text-[10px] font-black text-accent-rose uppercase pt-2">Desativado</button>
             </div>
-            <div>
-              <h3 className="text-base font-semibold text-surface-50">
-                Gemini Pro AI
-              </h3>
-              <p className="text-xs text-surface-500">
-                Motor de inteligência artificial para o chatbot.
-              </p>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-surface-300 mb-1.5">
-              API Key
-            </label>
-            <input
-              type="password"
-              placeholder="Chave de API do Google Gemini"
-              className="w-full px-4 py-2.5 bg-surface-800/60 border border-surface-700/30 rounded-xl text-sm text-surface-200 placeholder-surface-500 focus:outline-none focus:border-brand-600/50 transition-colors"
-            />
-          </div>
-        </div>
-
-        {/* General Settings */}
-        <div className="rounded-2xl bg-surface-900/60 border border-surface-800/50 p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-brand-600/10 flex items-center justify-center">
-              <Settings className="w-5 h-5 text-brand-400" />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-surface-50">
-                Geral
-              </h3>
-              <p className="text-xs text-surface-500">
-                Preferências gerais do sistema.
-              </p>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-surface-300 mb-1.5">
-              Idioma da IA
-            </label>
-            <select className="w-full px-4 py-2.5 bg-surface-800/60 border border-surface-700/30 rounded-xl text-sm text-surface-200 focus:outline-none focus:border-brand-600/50 transition-colors">
-              <option value="pt-PT">Português (Portugal)</option>
-              <option value="pt-BR">Português (Brasil)</option>
-              <option value="en">English</option>
-              <option value="es">Español</option>
-            </select>
           </div>
         </div>
       </div>
