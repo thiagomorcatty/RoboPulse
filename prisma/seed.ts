@@ -16,10 +16,8 @@ async function main() {
   const password = "Senha123!";
   const name = "Admin";
   let firebaseUid = "";
-
+  // 1. Tentar encontrar ou criar no Firebase
   try {
-    // 1. Tentar encontrar ou criar no Firebase
-    try {
       const userRecord = await adminAuth.getUserByEmail(email);
       firebaseUid = userRecord.uid;
       console.log("ℹ️ User already exists in Firebase:", firebaseUid);
