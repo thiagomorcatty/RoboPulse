@@ -7,12 +7,13 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import Cookies from "js-cookie";
-import { LogIn, Mail, Lock, AlertCircle, Loader2 } from "lucide-react";
+import { LogIn, Mail, Lock, AlertCircle, Loader2, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -23,14 +24,27 @@ export default function LoginPage() {
     setError("");
 
     try {
+      if (!auth) {
+        throw new Error("O Firebase não foi inicializado corretamente. Verifique as variáveis de ambiente.");
+      }
+
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const token = await userCredential.user.getIdToken();
+      
       // Define o cookie de sessão por 7 dias
       Cookies.set("session", token, { expires: 7 });
+      
+      console.log("Login bem-sucedido, redirecionando...");
       router.push("/dashboard");
     } catch (err: any) {
-      console.error(err);
-      setError("Credenciais inválidas. Verifique seu e-mail e senha.");
+      console.error("Erro no Login:", err);
+      let message = "Credenciais inválidas. Verifique seu e-mail e senha.";
+      
+      if (err.message.includes("Firebase")) {
+        message = "Erro de conexão com o servidor de autenticação.";
+      }
+      
+      setError(err.message || message);
     } finally {
       setLoading(false);
     }
@@ -104,13 +118,20 @@ export default function LoginPage() {
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400 group-focus-within:text-brand-600 transition-colors" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-4 bg-surface-950/50 border border-surface-800 rounded-2xl text-surface-100 placeholder:text-surface-600 font-medium focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition-all"
+                  className="w-full pl-12 pr-12 py-4 bg-surface-950/50 border border-surface-800 rounded-2xl text-surface-100 placeholder:text-surface-600 font-medium focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition-all"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-surface-400 hover:text-brand-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
 
