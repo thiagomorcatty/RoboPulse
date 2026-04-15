@@ -31,7 +31,7 @@ export default async function UserEditPage({ params }: { params: { id: string } 
     const data = {
       name: formData.get("name"),
       role: formData.get("role"),
-      whatsapp: formData.get("whatsapp"),
+      phoneNumber: formData.get("phoneNumber"),
     };
     await updateUser(params.id, data);
   }
@@ -50,7 +50,7 @@ export default async function UserEditPage({ params }: { params: { id: string } 
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-black text-surface-100 tracking-tight">
-              Configurações de <span className="text-brand-600">{user.name}</span>
+              Configurações de <span className="text-brand-600">{user.name || "Usuário"}</span>
             </h1>
             <p className="text-surface-500 font-medium font-sans">
               Gerencie permissões, WhatsApp e conexões de API
@@ -77,7 +77,7 @@ export default async function UserEditPage({ params }: { params: { id: string } 
                 <label className="text-xs font-black uppercase tracking-widest text-surface-400 ml-1">Nome</label>
                 <input
                   name="name"
-                  defaultValue={user.name}
+                  defaultValue={user.name || ""}
                   className="w-full px-4 py-3 bg-surface-950/20 border border-surface-800 rounded-xl text-surface-100 font-medium focus:ring-2 focus:ring-brand-600/20 transition-all font-sans"
                 />
               </div>
@@ -102,8 +102,8 @@ export default async function UserEditPage({ params }: { params: { id: string } 
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-surface-400 ml-1">WhatsApp</label>
                 <input
-                  name="whatsapp"
-                  defaultValue={user.whatsapp || ""}
+                  name="phoneNumber"
+                  defaultValue={user.phoneNumber || ""}
                   placeholder="+351 9..."
                   className="w-full px-4 py-3 bg-surface-950/20 border border-surface-800 rounded-xl text-surface-100 font-medium focus:ring-2 focus:ring-brand-600/20 transition-all font-sans"
                 />
@@ -166,10 +166,10 @@ export default async function UserEditPage({ params }: { params: { id: string } 
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand-50 rounded-full blur-3xl opacity-50 -mr-16 -mt-16" />
             <div className="relative flex flex-col items-center text-center space-y-4">
               <div className="w-20 h-20 rounded-[2rem] bg-brand-600 text-white flex items-center justify-center text-2xl font-black shadow-xl shadow-brand-600/20">
-                {user.name.substring(0, 2).toUpperCase()}
+                {(user.name || "U").substring(0, 2).toUpperCase()}
               </div>
               <div>
-                <h3 className="font-black text-surface-100">{user.name}</h3>
+                <h3 className="font-black text-surface-100">{user.name || "Usuário"}</h3>
                 <span className="text-xs font-black text-brand-600 uppercase tracking-widest">{user.role}</span>
               </div>
               <div className="w-full pt-4 border-t border-surface-800 space-y-3">

@@ -155,7 +155,7 @@ export default function CreateUserPage() {
               <div className="relative group">
                 <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400 group-focus-within:text-brand-600 transition-colors" />
                 <input
-                  name="whatsapp"
+                  name="phoneNumber"
                   type="text"
                   placeholder="+351 9XX XXX XXX"
                   className="w-full pl-12 pr-4 py-4 bg-surface-950/20 border border-surface-800 rounded-2xl text-surface-100 placeholder:text-surface-600 font-medium focus:outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-600 transition-all"

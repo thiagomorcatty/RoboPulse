@@ -59,7 +59,7 @@ export default async function UsersPage() {
             <span className="text-sm font-bold text-surface-400 uppercase tracking-wider">Com WhatsApp</span>
           </div>
           <div className="text-3xl font-black text-surface-200">
-            {users.filter(u => u.whatsapp).length}
+            {users.filter(u => u.phoneNumber).length}
           </div>
         </div>
       </div>
@@ -94,10 +94,10 @@ export default async function UsersPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-black text-sm uppercase">
-                        {u.name.substring(0, 2)}
+                        {(u.name || "U").substring(0, 2)}
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-sm font-black text-surface-100">{u.name}</span>
+                        <span className="text-sm font-black text-surface-100">{u.name || "Usuário sem Nome"}</span>
                         <div className="flex items-center gap-1 text-[11px] text-surface-500 font-medium">
                           <Mail className="w-3 h-3" />
                           {u.email}
@@ -117,7 +117,7 @@ export default async function UsersPage() {
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-sm font-bold text-surface-300">
-                      {u.whatsapp || "Não configurado"}
+                      {u.phoneNumber || "Não configurado"}
                     </span>
                   </td>
                   <td className="px-6 py-4">

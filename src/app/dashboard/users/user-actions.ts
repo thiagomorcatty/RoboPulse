@@ -9,7 +9,7 @@ export async function createUser(formData: FormData) {
   const password = formData.get("password") as string;
   const name = formData.get("name") as string;
   const role = formData.get("role") as any;
-  const whatsapp = formData.get("whatsapp") as string;
+  const phoneNumber = formData.get("phoneNumber") as string;
 
   try {
     // 1. Criar usuário no Firebase via Admin SDK
@@ -27,7 +27,7 @@ export async function createUser(formData: FormData) {
         name,
         firebaseUid: userRecord.uid,
         role: role || "USER",
-        whatsapp: whatsapp || null,
+        phoneNumber: phoneNumber || null,
       },
     });
 
@@ -65,8 +65,7 @@ export async function updateUser(id: string, data: any) {
       data: {
         name: data.name,
         role: data.role,
-        whatsapp: data.whatsapp,
-        // Campos de configuração futura (APIs, etc) podem ser guardados em JSON ou novas colunas
+        phoneNumber: data.phoneNumber,
       },
     });
 
