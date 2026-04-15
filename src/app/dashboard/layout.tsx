@@ -13,6 +13,7 @@ import {
   ChevronRight,
   LogOut,
   UserPlus,
+  User,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,11 @@ const navItems = [
     label: "Conversas",
     href: "/dashboard/inbox",
     icon: MessageSquare,
+  },
+  {
+    label: "Perfil (IA)",
+    href: "/dashboard/profile",
+    icon: User,
   },
   {
     label: "Usuários",
@@ -63,8 +69,24 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const { user } = useAuth();
+  const { user, dbUser } = useAuth();
   const router = useRouter();
+
+  // Filtragem dinâmica do menu baseada no papel do usuário
+  const isAdmin = dbUser?.role === "ADMIN" || dbUser?.role === "SUPER_ADMIN";
+  
+  const filteredNavItems = navItems.filter((item) => {
+    // Itens exclusivos do Admin
+    if (["Usuários", "Novo Usuário", "Definições"].includes(item.label)) {
+      return isAdmin;
+    }
+    // Itens exclusivos do Usuário/Agente
+    if (["Conversas", "Perfil (IA)", "Base de Conhecimento"].includes(item.label)) {
+      return !isAdmin;
+    }
+    // Dashboard aparece para todos
+    return true;
+  });
 
   const handleLogout = async () => {
     try {
@@ -111,7 +133,7 @@ export default function DashboardLayout({
 
         {/* Navigation */}
         <nav className="flex-1 py-6 px-3 space-y-1.5 overflow-y-auto custom-scrollbar">
-          {navItems.map((item) => {
+          {filteredNavItems.map((item) => {
             const isActive =
               pathname === item.href ||
               (item.href !== "/dashboard" && pathname.startsWith(item.href));
