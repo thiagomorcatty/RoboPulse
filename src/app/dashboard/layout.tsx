@@ -41,12 +41,12 @@ const navItems = [
     icon: User,
   },
   {
-    label: "Usuários",
+    label: "Lista de Usuários",
     href: "/dashboard/users",
     icon: Users,
   },
   {
-    label: "Novo Usuário",
+    label: "Cadastro de Usuários",
     href: "/dashboard/users/create",
     icon: UserPlus,
   },
@@ -134,9 +134,8 @@ export default function DashboardLayout({
         {/* Navigation */}
         <nav className="flex-1 py-6 px-3 space-y-1.5 overflow-y-auto custom-scrollbar">
           {filteredNavItems.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            // Lógica para evitar que /dashboard/users/create ative também /dashboard/users
+            const isActive = pathname === item.href;
 
             return (
               <Link
