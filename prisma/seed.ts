@@ -7,21 +7,52 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+import { adminAuth } from "../src/lib/firebase-admin";
+
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // Create admin user
-  const adminUser = await prisma.user.upsert({
-    where: { email: "admin@robopulse.pt" },
-    update: {},
-    create: {
-      email: "admin@robopulse.pt",
-      name: "Administrador",
-      password: "admin123", // TODO: hash in production
-      role: "SUPER_ADMIN",
-    },
-  });
-  console.log("✅ Admin user created:", adminUser.email);
+  const email = "admin@email.com";
+  const password = "Senha123!";
+  const name = "Admin";
+  let firebaseUid = "";
+
+  try {
+    // 1. Tentar encontrar ou criar no Firebase
+    try {
+      const userRecord = await adminAuth.getUserByEmail(email);
+      firebaseUid = userRecord.uid;
+      console.log("ℹ️ User already exists in Firebase:", firebaseUid);
+    } catch (error: any) {
+      if (error.code === "auth/user-not-found") {
+        const userRecord = await adminAuth.createUser({
+          email,
+          password,
+          displayName: name,
+        });
+        firebaseUid = userRecord.uid;
+        console.log("✅ User created in Firebase:", firebaseUid);
+      } else {
+        throw error;
+      }
+    }
+
+    // 2. Upsert no Prisma
+    const adminUser = await prisma.user.upsert({
+      where: { email },
+      update: {
+        firebaseUid,
+        name,
+        role: "ADMIN",
+      },
+      create: {
+        email,
+        name,
+        firebaseUid,
+        role: "ADMIN",
+      },
+    });
+    console.log("✅ Admin user synced in Prisma:", adminUser.email);
 
   // Create 5 example tenant profiles
   const tenants = [

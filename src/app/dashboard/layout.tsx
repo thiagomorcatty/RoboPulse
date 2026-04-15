@@ -15,6 +15,11 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 const navItems = [
   {
@@ -51,6 +56,18 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      Cookies.remove("session");
+      router.push("/login");
+    } catch (error) {
+      console.error("Erro ao sair:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-surface-950 flex font-sans">
@@ -122,14 +139,20 @@ export default function DashboardLayout({
         <div className="p-4 border-t border-surface-800 bg-surface-950/20">
           {!collapsed && (
             <div className="mb-4 px-2 py-3 rounded-xl bg-white border border-surface-800 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white text-xs font-bold">
-                AD
+              <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white text-xs font-bold uppercase">
+                {user?.email?.substring(0, 2) || "RP"}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-bold text-surface-100 truncate">Admin</span>
-                <span className="text-[10px] text-surface-500 truncate">Sair do sistema</span>
+                <span className="text-xs font-bold text-surface-100 truncate">
+                  {user?.displayName || user?.email?.split("@")[0] || "Utilizador"}
+                </span>
+                <span className="text-[10px] text-surface-500 truncate">Online</span>
               </div>
-              <button className="ml-auto text-surface-400 hover:text-accent-rose transition-colors">
+              <button 
+                onClick={handleLogout}
+                className="ml-auto text-surface-400 hover:text-accent-rose transition-colors"
+                title="Sair do sistema"
+              >
                 <LogOut className="w-4 h-4" />
               </button>
             </div>

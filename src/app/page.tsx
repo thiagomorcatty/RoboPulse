@@ -76,7 +76,7 @@ export default function HomePage() {
 
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-5">
             <Link
-              href="/dashboard"
+              href="/login"
               className="group flex items-center gap-2 px-10 py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold text-lg rounded-2xl transition-all duration-300 shadow-xl shadow-brand-600/30 hover:-translate-y-1"
             >
               Começar Agora Gratuitamente

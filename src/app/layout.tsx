@@ -13,14 +13,18 @@ export const metadata: Metadata = {
     "Plataforma SaaS de atendimento automatizado via WhatsApp com Inteligência Artificial. Gestão de perfis, base de conhecimento e agendamento integrado.",
 };
 
+import { Providers } from "@/components/providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-PT" className="dark">
-      <body className={`${inter.variable} antialiased`}>{children}</body>
+    <html lang="pt-PT" className="light">
+      <body className={`${inter.variable} antialiased`}>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

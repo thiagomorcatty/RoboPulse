@@ -15,25 +15,27 @@ datasource db {
 // ============================================
 // Admin Users (Quem acede ao painel)
 // ============================================
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  AGENT
+  USER
+}
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  password  String
-  role      Role     @default(ADMIN)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  firebaseUid String   @unique
+  whatsapp    String?
+  role        Role     @default(ADMIN)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   tenants       TenantUser[]
   sentMessages  Message[]     @relation("SentByUser")
 
   @@map("users")
-}
-
-enum Role {
-  SUPER_ADMIN
-  ADMIN
-  AGENT
 }
 
 // ============================================
