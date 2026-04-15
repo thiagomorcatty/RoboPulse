@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  UserPlus,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ import { signOut } from "firebase/auth";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
+// v1.1 - Atualização do menu de gestão de usuários
 const navItems = [
   {
     label: "Dashboard",
@@ -33,9 +35,14 @@ const navItems = [
     icon: MessageSquare,
   },
   {
-    label: "Perfis",
-    href: "/dashboard/tenants",
+    label: "Usuários",
+    href: "/dashboard/users",
     icon: Users,
+  },
+  {
+    label: "Novo Usuário",
+    href: "/dashboard/users/create",
+    icon: UserPlus,
   },
   {
     label: "Base de Conhecimento",
@@ -63,7 +70,8 @@ export default function DashboardLayout({
     try {
       await signOut(auth);
       Cookies.remove("session");
-      router.push("/login");
+      // Forçar recarregamento completo para o Proxy limpar a sessão
+      window.location.href = "/login";
     } catch (error) {
       console.error("Erro ao sair:", error);
     }
