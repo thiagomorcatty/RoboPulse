@@ -19,7 +19,7 @@ function createFirebaseAdminApp() {
 }
 
 const adminApp = createFirebaseAdminApp();
-const adminAuth = adminApp ? admin.auth(adminApp) : null as any;
-const adminDb = adminApp ? admin.firestore(adminApp) : null as any;
+const adminAuth = adminApp ? admin.auth(adminApp) : undefined as any;
+const adminDb = adminApp ? admin.firestore(adminApp) : undefined as any;
 
 export { adminApp, adminAuth, adminDb };

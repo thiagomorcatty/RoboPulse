@@ -16,15 +16,15 @@ const firebaseConfig = {
 const app = 
   getApps().length > 0 
     ? getApp() 
-    : (firebaseConfig.apiKey ? initializeApp(firebaseConfig) : null);
+    : (firebaseConfig.apiKey ? initializeApp(firebaseConfig) : undefined);
 
-const auth = app ? getAuth(app) : null as any;
+const auth = app ? getAuth(app) : undefined as any;
 
 // Initialize Analytics conditionally (client-side only)
 let analytics;
-if (typeof window !== "undefined") {
+if (typeof window !== "undefined" && app) {
   isSupported().then((supported) => {
-    if (supported) {
+    if (supported && app) {
       analytics = getAnalytics(app);
     }
   });
