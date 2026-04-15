@@ -7,16 +7,19 @@ const firebaseAdminConfig = {
 };
 
 function createFirebaseAdminApp() {
-  if (!admin.apps.length) {
-    return admin.initializeApp({
-      credential: admin.credential.cert(firebaseAdminConfig),
-    });
+  if (admin.apps.length) return admin.app();
+  
+  if (!firebaseAdminConfig.projectId || !firebaseAdminConfig.clientEmail) {
+    return null;
   }
-  return admin.app();
+
+  return admin.initializeApp({
+    credential: admin.credential.cert(firebaseAdminConfig as any),
+  });
 }
 
 const adminApp = createFirebaseAdminApp();
-const adminAuth = admin.auth(adminApp);
-const adminDb = admin.firestore(adminApp);
+const adminAuth = adminApp ? admin.auth(adminApp) : null as any;
+const adminDb = adminApp ? admin.firestore(adminApp) : null as any;
 
 export { adminApp, adminAuth, adminDb };
