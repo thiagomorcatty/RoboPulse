@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { updateAccount } from "./account-actions";
+import { cn } from "@/lib/utils";
 
 export default function AccountPage() {
   const { dbUser } = useAuth();
