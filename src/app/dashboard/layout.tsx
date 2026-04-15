@@ -88,13 +88,15 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const { user, dbUser } = useAuth();
+  const { user, dbUser, activeTenant, setActiveTenant, loading } = useAuth();
   const router = useRouter();
 
   // Filtragem dinâmica do menu baseada no papel do usuário
   const isAdmin = dbUser?.role === "ADMIN" || dbUser?.role === "SUPER_ADMIN";
   
   const filteredNavItems = navItems.filter((item) => {
+    if (loading) return false; // Evitar flash de menu incorreto durante loading
+    
     // Itens exclusivos do Admin (Gestão de Sistema e Outros Usuários)
     if (["Lista de Usuários", "Cadastro de Usuários"].includes(item.label)) {
       return isAdmin;
@@ -105,7 +107,6 @@ export default function DashboardLayout({
       return !isAdmin;
     }
 
-    // Dashboard e Definições aparecem para todos (embora o conteúdo de Definições mude internamente)
     return true;
   });
 

@@ -13,6 +13,11 @@ export async function GET() {
 
   try {
     // 1. Verificar o token no Firebase Admin
+    if (!adminAuth) {
+      console.error("Firebase Admin não inicializado. Verifique as variáveis de ambiente.");
+      return NextResponse.json({ error: "Erro de configuração do servidor" }, { status: 500 });
+    }
+
     const decodedToken = await adminAuth.verifyIdToken(session);
     const email = decodedToken.email;
 
