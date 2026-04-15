@@ -33,8 +33,8 @@ export default function ContactsPage() {
   // Filtro de contatos (Mock enquanto não buscamos do banco em tempo real via hooks)
   const contacts = dbUser?.contacts || [];
   const filteredContacts = contacts.filter((c: any) => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    c.waId.includes(searchTerm)
+    (c.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    c.waId?.includes(searchTerm))
   );
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -258,7 +258,6 @@ export default function DashboardLayout({
                       <button
                         key={tu.tenant.id}
                         onClick={() => {
-                          const { setActiveTenant } = require("@/context/auth-context").useAuth();
                           setActiveTenant(tu.tenant);
                         }}
                         className={cn(

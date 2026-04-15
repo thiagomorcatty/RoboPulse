@@ -24,7 +24,8 @@ export async function GET() {
           include: {
             tenant: true
           }
-        }
+        },
+        contacts: true
       }
     });
 
