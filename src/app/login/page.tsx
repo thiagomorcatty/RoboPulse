@@ -25,26 +25,39 @@ export default function LoginPage() {
 
     try {
       if (!auth) {
-        throw new Error("O Firebase não foi inicializado corretamente. Verifique as variáveis de ambiente.");
+        throw new Error("O Firebase não foi inicializado. Verifique as variáveis de ambiente no Vercel.");
       }
 
+      console.log("Iniciando autenticação no Firebase...");
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const token = await userCredential.user.getIdToken();
       
-      // Define o cookie de sessão por 7 dias
-      Cookies.set("session", token, { expires: 7 });
+      console.log("Token obtido, gravando cookie...");
       
-      console.log("Login bem-sucedido, redirecionando...");
-      router.push("/dashboard");
+      // Define o cookie de sessão de forma robusta
+      Cookies.set("session", token, { 
+        expires: 7, 
+        path: "/", 
+        sameSite: "lax",
+        secure: window.location.protocol === "https:"
+      });
+      
+      console.log("Redirecionando para o dashboard...");
+      // Usamos window.location.href para garantir que o Proxy/Middleware veja o cookie no próximo request
+      window.location.href = "/dashboard";
     } catch (err: any) {
-      console.error("Erro no Login:", err);
-      let message = "Credenciais inválidas. Verifique seu e-mail e senha.";
+      console.error("Erro detalhado no Login:", err);
+      let message = "Falha no login.";
       
-      if (err.message.includes("Firebase")) {
-        message = "Erro de conexão com o servidor de autenticação.";
+      if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+        message = "E-mail ou senha incorretos.";
+      } else if (err.code === "auth/invalid-api-key") {
+        message = "Configuração do Firebase inválida no servidor.";
+      } else {
+        message = err.message || "Ocorreu um erro inesperado.";
       }
       
-      setError(err.message || message);
+      setError(message);
     } finally {
       setLoading(false);
     }
