@@ -17,9 +17,11 @@ import { notFound } from "next/navigation";
 import { updateUser } from "../user-actions";
 import { cn } from "@/lib/utils";
 
-export default async function UserEditPage({ params }: { params: { id: string } }) {
+export default async function UserEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  
   const user = await prisma.user.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!user) {
@@ -33,7 +35,7 @@ export default async function UserEditPage({ params }: { params: { id: string } 
       role: formData.get("role"),
       phoneNumber: formData.get("phoneNumber"),
     };
-    await updateUser(params.id, data);
+    await updateUser(id, data);
   }
 
   return (
