@@ -10,8 +10,7 @@ import {
   Moon, 
   Save, 
   Loader2, 
-  CheckCircle,
-  Security
+  CheckCircle
 } from "lucide-react";
 import { useState } from "react";
 import { updateAccount } from "./account-actions";
