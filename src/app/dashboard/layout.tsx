@@ -234,54 +234,15 @@ export default function DashboardLayout({
       >
         {/* Top Bar */}
         <header className="h-20 border-b border-surface-800 bg-white/70 backdrop-blur-xl sticky top-0 z-30 flex items-center px-10 justify-between">
-          <div className="flex items-center gap-6">
-            <h2 className="text-base font-bold text-surface-100">
+          <div classNam            <h2 className="text-base font-bold text-surface-100">
               {navItems.find(
                 (item) =>
                   pathname === item.href ||
                   (item.href !== "/dashboard" && pathname.startsWith(item.href))
               )?.label || "Dashboard"}
             </h2>
-
-            {/* Profile Switcher (Apenas para Usuários) */}
-            {!isAdmin && dbUser?.tenants && dbUser.tenants.length > 0 && (
-              <div className="flex items-center gap-2 pl-6 border-l border-surface-800">
-                <span className="text-[10px] font-black uppercase tracking-widest text-surface-400">Atendente:</span>
-                <div className="relative group">
-                  <button className="flex items-center gap-2 px-3 py-1.5 bg-brand-50 border border-brand-200 rounded-lg text-xs font-bold text-brand-600 hover:bg-brand-100 transition-all">
-                    {activeTenant?.name || "Selecionar Perfil"}
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-                  
-                  {/* Dropdown Menu */}
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-surface-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-1.5">
-                    {dbUser.tenants.map((tu: any) => (
-                      <button
-                        key={tu.tenant.id}
-                        onClick={() => {
-                          setActiveTenant(tu.tenant);
-                        }}
-                        className={cn(
-                          "w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors",
-                          activeTenant?.id === tu.tenant.id 
-                            ? "bg-brand-50 text-brand-600" 
-                            : "text-surface-600 hover:bg-surface-950/20"
-                        )}
-                      >
-                        {tu.tenant.name}
-                      </button>
-                    ))}
-                    <div className="h-px bg-surface-800 my-1" />
-                    <Link
-                      href="/dashboard/persona"
-                      className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
-                    >
-                      + Criar Novo Perfil
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            )}
+          </div>
+          )}
           </div>
           
           <div className="flex items-center gap-4">

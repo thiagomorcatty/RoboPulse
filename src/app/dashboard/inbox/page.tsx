@@ -12,9 +12,11 @@ import {
   Clock,
   Check,
   CheckCheck,
-  Loader2
+  Loader2,
+  ChevronDown
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { getConversations, getMessages, sendMessage } from "./inbox-actions";
 import { cn } from "@/lib/utils";
 
@@ -93,7 +95,51 @@ export default function InboxPage() {
     <div className="h-[calc(100vh-140px)] flex bg-white border border-surface-800 rounded-[2.5rem] overflow-hidden shadow-sm animate-[fade-in_0.3s_ease-out]">
       {/* Column 1: Conversations List */}
       <div className="w-[380px] border-r border-surface-800 flex flex-col bg-surface-950/10">
-        <div className="p-6 border-b border-surface-800 bg-white">
+        <div className="p-6 border-b border-surface-800 bg-white space-y-4">
+          {/* Profile Switcher Local */}
+          {dbUser?.tenants && dbUser.tenants.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-surface-400 ml-1">Atendimento:</span>
+              <div className="relative group">
+                <button className="w-full flex items-center justify-between px-4 py-3 bg-brand-50 border border-brand-200 rounded-xl text-sm font-bold text-brand-600 hover:bg-brand-100 transition-all">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-brand-600 animate-pulse" />
+                    {activeTenant?.name || "Selecionar Perfil"}
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                
+                {/* Dropdown Menu */}
+                <div className="absolute top-full left-0 mt-2 w-full bg-white border border-surface-800 rounded-2xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-2 border-t-4 border-t-brand-600">
+                  {dbUser.tenants.map((tu: any) => (
+                    <button
+                      key={tu.tenant.id}
+                      onClick={() => {
+                        const { setActiveTenant } = useAuth(); // Actually this is already in scope from useAuth() hook at top
+                        setActiveTenant(tu.tenant);
+                      }}
+                      className={cn(
+                        "w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors mb-1 last:mb-0",
+                        activeTenant?.id === tu.tenant.id 
+                          ? "bg-brand-50 text-brand-600" 
+                          : "text-surface-600 hover:bg-surface-950/10"
+                      )}
+                    >
+                      {tu.tenant.name}
+                    </button>
+                  ))}
+                  <div className="h-px bg-surface-800 my-2" />
+                  <Link
+                    href="/dashboard/persona"
+                    className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-brand-600 hover:bg-brand-50 rounded-xl transition-colors"
+                  >
+                    + Criar Novo Atendente
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-500" />
             <input 

@@ -21,13 +21,34 @@ export async function createUser(formData: FormData) {
     });
 
     // 2. Sincronizar com Prisma
-    await prisma.user.create({
+    const dbUser = await prisma.user.create({
       data: {
         email,
         name,
         firebaseUid: userRecord.uid,
         role: role || "USER",
         phoneNumber: phoneNumber || null,
+      },
+    });
+
+    // 3. Criar Perfil Padrão (Tenant) automaticamente
+    // Isso garante que o usuário não comece com um dashboard vazio
+    const tenantSlug = `perfil-${name.toLowerCase().replace(/\s+/g, "-")}-${Math.floor(Math.random() * 1000)}`;
+    
+    await prisma.tenant.create({
+      data: {
+        name: "Perfil Padrão",
+        slug: tenantSlug,
+        segment: "Geral",
+        description: `Perfil inicial de ${name}`,
+        systemPrompt: "Você é um atendente virtual prestativo e profissional.",
+        temperature: 0.7,
+        users: {
+          create: {
+            userId: dbUser.id,
+            role: "OWNER",
+          },
+        },
       },
     });
 

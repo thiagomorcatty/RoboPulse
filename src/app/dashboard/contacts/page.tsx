@@ -14,21 +14,26 @@ import {
   X,
   CheckCircle,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  ChevronDown,
+  PlusCircle
 } from "lucide-react";
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { createContact, deleteContact, importContacts } from "./contact-actions";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export default function ContactsPage() {
-  const { dbUser } = useAuth();
-  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [showImport, setShowImport] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [csvPreview, setCsvPreview] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
+  const { user, dbUser, activeTenant, setActiveTenant } = useAuth();
 
   // Filtro de contatos (Mock enquanto não buscamos do banco em tempo real via hooks)
   const contacts = dbUser?.contacts || [];
@@ -66,6 +71,29 @@ export default function ContactsPage() {
     setImporting(false);
   };
 
+  const handleCreateContact = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!dbUser?.id || !activeTenant?.id) return;
+
+    setSaving(true);
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      name: formData.get("name"),
+      waId: formData.get("waId"),
+      email: formData.get("email"),
+      tenantId: activeTenant.id
+    };
+
+    const result = await createContact(dbUser.id, data);
+    if (result.success) {
+      setShowCreateModal(false);
+      window.location.reload();
+    } else {
+      alert("Erro ao criar contato: " + result.error);
+    }
+    setSaving(false);
+  };
+
   return (
     <div className="space-y-8 animate-[fade-in_0.3s_ease-out]">
       {/* Header */}
@@ -84,6 +112,43 @@ export default function ContactsPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Profile Switcher Local */}
+          {!loading && dbUser?.tenants && dbUser.tenants.length > 0 && (
+            <div className="relative group mr-2">
+              <button className="flex items-center gap-2 px-4 py-3 bg-white border border-surface-800 rounded-2xl text-xs font-bold text-surface-500 hover:border-brand-600 transition-all shadow-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-brand-600 animate-pulse" />
+                  Atendente: <span className="text-brand-600">{activeTenant?.name || "Selecionar"}</span>
+                </div>
+                <ChevronDown className="w-3 h-3" />
+              </button>
+              
+              <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-surface-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 p-1.5 border-t-4 border-t-brand-600">
+                {dbUser.tenants.map((tu: any) => (
+                  <button
+                    key={tu.tenant.id}
+                    onClick={() => setActiveTenant(tu.tenant)}
+                    className={cn(
+                      "w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors mb-1",
+                      activeTenant?.id === tu.tenant.id 
+                        ? "bg-brand-50 text-brand-600" 
+                        : "text-surface-600 hover:bg-surface-950/10"
+                    )}
+                  >
+                    {tu.tenant.name}
+                  </button>
+                ))}
+                <div className="h-px bg-surface-800 my-1" />
+                <Link
+                  href="/dashboard/persona"
+                  className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
+                >
+                  + Novo Atendente
+                </Link>
+              </div>
+            </div>
+          )}
+
           <button 
             onClick={() => setShowImport(true)}
             className="px-6 py-3 bg-white border border-surface-800 text-surface-100 font-bold rounded-2xl hover:bg-surface-950/20 transition-all flex items-center gap-2"
@@ -91,7 +156,10 @@ export default function ContactsPage() {
             <Upload className="w-4 h-4" />
             Importar CSV
           </button>
-          <button className="px-6 py-3 bg-brand-600 text-white font-black rounded-2xl hover:bg-brand-700 shadow-lg shadow-brand-600/20 transition-all flex items-center gap-2">
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            className="px-6 py-3 bg-brand-600 text-white font-black rounded-2xl hover:bg-brand-700 shadow-lg shadow-brand-600/20 transition-all flex items-center gap-2"
+          >
             <UserPlus className="w-4 h-4" />
             Novo Contato
           </button>
@@ -186,8 +254,9 @@ export default function ContactsPage() {
         </table>
       </div>
 
-      {/* CSV Import Modal */}
+      {/* Modals Section */}
       {showImport && (
+        // ... (existing import modal code)
         <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-[fade-in_0.2s_ease-out]">
           <div className="bg-white border border-surface-800 rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
             <div className="p-8 border-b border-surface-800 flex items-center justify-between bg-surface-950/5">
@@ -275,6 +344,89 @@ export default function ContactsPage() {
                 Confirmar Importação
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manual Creation Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-surface-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-[fade-in_0.2s_ease-out]">
+          <div className="bg-white border border-surface-800 rounded-[2.5rem] w-full max-w-[500px] shadow-2xl overflow-hidden flex flex-col">
+            <div className="p-8 border-b border-surface-800 flex items-center justify-between bg-surface-950/5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-surface-100 uppercase tracking-tight">Novo Contato</h3>
+                  <p className="text-[10px] text-surface-500 font-bold uppercase tracking-widest">Cadastro manual de lead</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowCreateModal(false)}
+                className="p-2 hover:bg-surface-950/20 rounded-xl transition-colors"
+              >
+                <X className="w-6 h-6 text-surface-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateContact}>
+              <div className="p-8 space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-widest text-surface-400 ml-1">Nome Completo</label>
+                    <input
+                      name="name"
+                      required
+                      placeholder="Ex: João Silva"
+                      className="w-full px-4 py-4 bg-surface-950/20 border border-surface-800 rounded-2xl text-surface-100 font-medium focus:ring-4 focus:ring-brand-500/10 outline-none transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-widest text-surface-400 ml-1">WhatsApp (com DDD)</label>
+                    <input
+                      name="waId"
+                      required
+                      placeholder="Ex: 5511999999999"
+                      className="w-full px-4 py-4 bg-surface-950/20 border border-surface-800 rounded-2xl text-surface-100 font-mono font-bold focus:ring-4 focus:ring-brand-500/10 outline-none transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-widest text-surface-400 ml-1">E-mail (Opcional)</label>
+                    <input
+                      name="email"
+                      type="email"
+                      placeholder="joao@email.com"
+                      className="w-full px-4 py-4 bg-surface-950/20 border border-surface-800 rounded-2xl text-surface-100 font-medium focus:ring-4 focus:ring-brand-500/10 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-brand-50 border border-brand-100 rounded-2xl flex gap-3 italic">
+                  <div className="text-[10px] text-brand-600 font-medium">
+                    O contato será vinculado ao atendente <strong>{activeTenant?.name}</strong>.
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-8 border-t border-surface-800 bg-surface-950/5 flex items-center justify-end gap-4">
+                <button 
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-6 py-3 text-xs font-black uppercase text-surface-500 hover:text-surface-100 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  disabled={saving}
+                  className="px-10 py-4 bg-brand-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-brand-700 shadow-xl shadow-brand-600/20 transition-all disabled:opacity-50 flex items-center gap-2"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                  Salvar Contato
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
