@@ -79,49 +79,10 @@ export default function HomePage() {
               href="/login"
               className="group flex items-center gap-2 px-10 py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold text-lg rounded-2xl transition-all duration-300 shadow-xl shadow-brand-600/30 hover:-translate-y-1"
             >
-              Começar Agora Gratuitamente
+              Começar
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
-        </div>
-
-        {/* Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-24 animate-[slide-up_0.6s_ease-out]">
-          {[
-            {
-              icon: MessageSquare,
-              title: "Inbox em Tempo Real",
-              description:
-                "Controle total sobre as suas conversas. Acompanhe o robô ou assuma o controlo imediato do atendimento.",
-            },
-            {
-              icon: Shield,
-              title: "Segmentos Customizados",
-              description:
-                "IA treinada especificamente para o seu nicho: Imobiliária, Seguros, Contabilidade e muito mais.",
-            },
-            {
-              icon: Calendar,
-              title: "Agendamento Inteligente",
-              description:
-                "Converta contactos em reuniões automaticamente usando a integração oficial com o Google Calendar.",
-            },
-          ].map((feature) => (
-            <div
-              key={feature.title}
-              className="group p-8 rounded-3xl bg-white border border-surface-800/80 hover:border-brand-300 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-brand-600/5 hover:-translate-y-1"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center mb-6 group-hover:bg-brand-100 transition-colors">
-                <feature.icon className="w-7 h-7 text-brand-600" />
-              </div>
-              <h3 className="text-xl font-bold text-surface-100 mb-3">
-                {feature.title}
-              </h3>
-              <p className="text-surface-500 leading-relaxed font-medium">
-                {feature.description}
-              </p>
-            </div>
-          ))}
         </div>
       </main>
 
