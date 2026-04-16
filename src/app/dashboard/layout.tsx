@@ -98,13 +98,13 @@ export default function DashboardLayout({
     if (loading) return false; // Evitar flash de menu incorreto durante loading
     
     // Itens exclusivos do Admin (Gestão de Sistema e Outros Usuários)
-    if (["Lista de Usuários", "Cadastro de Usuários"].includes(item.label)) {
+    if (["Lista de Usuários", "Cadastro de Usuários", "Definições"].includes(item.label)) {
       return isAdmin;
     }
 
     // Itens exclusivos do Usuário (Operação e Configuração Pessoal)
     if (["Conversas", "Contatos", "Perfil do Atendente", "Base de Conhecimento", "Integrações", "Minha Conta"].includes(item.label)) {
-      return !isAdmin;
+      return true; // Todos podem ver suas próprias operações
     }
 
     return true;

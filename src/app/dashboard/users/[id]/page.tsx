@@ -15,8 +15,8 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { updateUser } from "../user-actions";
-import { updateTenant } from "../../persona/tenant-actions";
 import { cn } from "@/lib/utils";
+import TenantConfigManager from "./tenant-config-manager";
 
 export default async function UserEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -44,19 +44,6 @@ export default async function UserEditPage({ params }: { params: Promise<{ id: s
       phoneNumber: formData.get("phoneNumber"),
     };
     await updateUser(id, data);
-  }
-
-  async function updateTenantAction(formData: FormData) {
-    "use server";
-    const tenantId = formData.get("tenantId") as string;
-    const data = {
-      name: formData.get("tenantName"),
-      geminiKey: formData.get("geminiKey"),
-      whatsappPhoneId: formData.get("whatsappPhoneId"),
-      whatsappToken: formData.get("whatsappToken"),
-      calendarId: formData.get("calendarId"),
-    };
-    await updateTenant(tenantId, data);
   }
 
   return (
@@ -142,102 +129,8 @@ export default async function UserEditPage({ params }: { params: Promise<{ id: s
             </button>
           </form>
 
-          {/* Profiles & Integrations Sections */}
-          {user.tenants.map(({ tenant }) => (
-            <div key={tenant.id} className="bg-white border border-surface-800 rounded-[2rem] p-8 shadow-sm space-y-8 animate-[slide-up_0.3s_ease-out]">
-              <div className="flex items-center justify-between pb-2 border-b border-surface-800">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600">
-                    <User className="w-4 h-4" />
-                  </div>
-                  <h2 className="text-lg font-black text-surface-100 uppercase tracking-tight">Atendente: <span className="text-brand-600">{tenant.name}</span></h2>
-                </div>
-                <div className="px-3 py-1 bg-surface-950/20 rounded-full text-[10px] font-black text-surface-500 uppercase tracking-widest">
-                  ID: {tenant.id}
-                </div>
-              </div>
-
-              <form action={updateTenantAction} className="space-y-6">
-                <input type="hidden" name="tenantId" value={tenant.id} />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2 lg:col-span-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-surface-400 ml-1">Nome do Atendente (Exibição)</label>
-                    <input
-                      name="tenantName"
-                      defaultValue={tenant.name || ""}
-                      className="w-full px-4 py-3 bg-surface-950/20 border border-surface-800 rounded-xl text-surface-100 font-medium focus:ring-2 focus:ring-brand-600/20 transition-all"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-surface-400 ml-1">
-                      <Webhook className="w-3 h-3 text-accent-indigo" />
-                      Gemini API Key
-                    </label>
-                    <input
-                      name="geminiKey"
-                      type="password"
-                      defaultValue={tenant.geminiKey || ""}
-                      placeholder="AIzaSy..."
-                      className="w-full px-4 py-3 bg-surface-950/20 border border-surface-800 rounded-xl text-surface-100 font-mono text-sm focus:ring-2 focus:ring-brand-600/20 transition-all"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-surface-400 ml-1">
-                      <Calendar className="w-3 h-4 text-accent-amber" />
-                      Google Calendar ID
-                    </label>
-                    <input
-                      name="calendarId"
-                      defaultValue={tenant.calendarId || ""}
-                      placeholder="email@group.calendar.google.com"
-                      className="w-full px-4 py-3 bg-surface-950/20 border border-surface-800 rounded-xl text-surface-100 font-medium text-sm focus:ring-2 focus:ring-brand-600/20 transition-all font-sans"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-surface-400 ml-1">
-                      <Smartphone className="w-3 h-4 text-green-600" />
-                      WhatsApp Phone ID
-                    </label>
-                    <input
-                      name="whatsappPhoneId"
-                      defaultValue={tenant.whatsappPhoneId || ""}
-                      placeholder="1234567890..."
-                      className="w-full px-4 py-3 bg-surface-950/20 border border-surface-800 rounded-xl text-surface-100 font-medium text-sm focus:ring-2 focus:ring-brand-600/20 transition-all font-mono"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-surface-400 ml-1">
-                      <Shield className="w-3 h-4 text-green-600" />
-                      WhatsApp Permanent Token
-                    </label>
-                    <input
-                      name="whatsappToken"
-                      type="password"
-                      defaultValue={tenant.whatsappToken || ""}
-                      placeholder="EAA..."
-                      className="w-full px-4 py-3 bg-surface-950/20 border border-surface-800 rounded-xl text-surface-100 font-mono text-sm focus:ring-2 focus:ring-brand-600/20 transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-surface-800">
-                  <p className="text-[10px] text-surface-500 font-medium max-w-[200px]">Estes dados são sensíveis. Garanta que o token da Meta é permanente.</p>
-                  <button
-                    type="submit"
-                    className="flex items-center gap-2 px-6 py-2.5 bg-brand-600 text-white font-black rounded-xl hover:bg-brand-700 transition-all shadow-lg active:scale-95 text-xs uppercase tracking-widest"
-                  >
-                    <Save className="w-3 h-3" />
-                    Sincronizar Atendente
-                  </button>
-                </div>
-              </form>
-            </div>
-          ))}
+          {/* Componente Dinâmico de Configuração de Múltiplos Perfis */}
+          <TenantConfigManager tenants={user.tenants} />
         </div>
 
         {/* Sidebar Info */}
