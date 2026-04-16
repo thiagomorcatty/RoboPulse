@@ -44,14 +44,14 @@ export default function HomePage() {
       {/* Hero */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-20">
         <div className="text-center max-w-4xl mx-auto animate-[fade-in_0.5s_ease-out]">
-          {/* Logo central com sombra suave */}
-          <div className="w-32 h-32 mx-auto mb-10 rounded-3xl overflow-hidden shadow-2xl shadow-brand-600/20 ring-4 ring-white">
+          {/* Logo central */}
+          <div className="w-full max-w-[280px] sm:max-w-[360px] mx-auto mb-10">
             <Image
               src="/logo.png"
               alt="RoboPulse Logo"
-              width={128}
-              height={128}
-              className="object-cover"
+              width={500}
+              height={250}
+              className="w-full h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500 ease-out"
               priority
             />
           </div>
