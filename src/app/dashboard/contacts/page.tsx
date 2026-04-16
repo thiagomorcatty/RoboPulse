@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export default function ContactsPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [showImport, setShowImport] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);

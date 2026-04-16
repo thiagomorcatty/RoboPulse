@@ -234,15 +234,14 @@ export default function DashboardLayout({
       >
         {/* Top Bar */}
         <header className="h-20 border-b border-surface-800 bg-white/70 backdrop-blur-xl sticky top-0 z-30 flex items-center px-10 justify-between">
-          <div classNam            <h2 className="text-base font-bold text-surface-100">
+          <div className="flex items-center gap-6">
+            <h2 className="text-base font-bold text-surface-100">
               {navItems.find(
                 (item) =>
                   pathname === item.href ||
                   (item.href !== "/dashboard" && pathname.startsWith(item.href))
               )?.label || "Dashboard"}
             </h2>
-          </div>
-          )}
           </div>
           
           <div className="flex items-center gap-4">
