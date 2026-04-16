@@ -90,7 +90,7 @@ export default async function UsersPage() {
             </thead>
             <tbody className="divide-y divide-surface-800">
               {users.map((u) => (
-                <tr key={u.id} className="hover:bg-brand-50/30 transition-colors group cursor-pointer" onClick={() => {}}>
+                <tr key={u.id} className="hover:bg-brand-50/30 transition-colors group">
                   <td className="px-6 py-4">
                     <Link href={`/dashboard/users/${u.id}`} className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-black text-sm uppercase">
