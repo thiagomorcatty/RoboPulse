@@ -93,6 +93,16 @@ export default function KnowledgePage() {
     fetchDocuments();
   }, [fetchDocuments]);
 
+  // Polling para atualizar status dos documentos em processamento
+  useEffect(() => {
+    const hasProcessing = documents.some(doc => doc.status === "PROCESSING" || doc.status === "PENDING");
+    
+    if (hasProcessing) {
+      const interval = setInterval(fetchDocuments, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [documents, fetchDocuments]);
+
   const handleUpload = async (files: FileList | null) => {
     if (!files || files.length === 0 || !selectedTenant) return;
 

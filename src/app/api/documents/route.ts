@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { processDocument } from "@/lib/knowledge-processor";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -90,6 +91,13 @@ export async function POST(request: NextRequest) {
         fileSize: file.size,
         status: "PENDING",
       },
+    });
+
+    // Disparar o processamento (Treino) de forma assíncrona
+    // Nota: Em produção Vercel, o ideal é usar uma Queue, 
+    // mas aqui disparamos e deixamos o log avisar.
+    processDocument(document.id).catch(err => {
+      console.error(`[Documents] Background Processing Failed for ${document.id}:`, err);
     });
 
     console.log(
