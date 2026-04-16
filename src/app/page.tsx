@@ -11,35 +11,7 @@ import {
 
 export default function HomePage() {
   return (
-    <div className="min-h-[100dvh] bg-surface-950 flex flex-col font-sans overflow-x-hidden">
-      {/* Header */}
-      <header className="border-b border-surface-800/50 backdrop-blur-md bg-surface-950/80 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl overflow-hidden shadow-sm">
-              <Image
-                src="/logo.png"
-                alt="RoboPulse"
-                width={40}
-                height={40}
-                className="w-full h-full object-contain bg-white"
-              />
-            </div>
-            <span className="text-lg md:text-xl font-bold tracking-tight">
-              <span className="text-surface-100">Robo</span>
-              <span className="text-brand-600">Pulse</span>
-            </span>
-          </div>
-          <div className="flex items-center">
-            <Link
-              href="/dashboard"
-              className="px-4 py-2 md:px-5 md:py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs md:text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-brand-600/20 active:scale-95"
-            >
-              Painel
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="h-[100dvh] bg-surface-950 flex flex-col font-sans overflow-hidden py-2 md:py-0">
 
       {/* Hero (Centralizado 100vh) */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 md:px-6 py-4 md:py-0 w-full overflow-hidden">
