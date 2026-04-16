@@ -51,7 +51,7 @@ export default function HomePage() {
               alt="RoboPulse Logo"
               width={500}
               height={250}
-              className="w-full h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500 ease-out"
+              className="w-full h-auto object-contain drop-shadow-2xl animate-heartbeat"
               priority
             />
           </div>
