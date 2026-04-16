@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { Users, UserPlus, Search, Edit2, Trash2, Mail, Shield, Smartphone } from "lucide-react";
+import { Users, UserPlus, Search, Settings, Trash2, Mail, Shield, Smartphone } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -90,9 +90,9 @@ export default async function UsersPage() {
             </thead>
             <tbody className="divide-y divide-surface-800">
               {users.map((u) => (
-                <tr key={u.id} className="hover:bg-brand-50/20 transition-colors group">
+                <tr key={u.id} className="hover:bg-brand-50/30 transition-colors group cursor-pointer" onClick={() => {}}>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
+                    <Link href={`/dashboard/users/${u.id}`} className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-black text-sm uppercase">
                         {(u.name || "U").substring(0, 2)}
                       </div>
@@ -103,7 +103,7 @@ export default async function UsersPage() {
                           {u.email}
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   </td>
                   <td className="px-6 py-4">
                     <span className={cn(
@@ -130,8 +130,9 @@ export default async function UsersPage() {
                       <Link
                         href={`/dashboard/users/${u.id}`}
                         className="p-2 text-surface-400 hover:text-brand-600 hover:bg-white rounded-lg transition-all shadow-sm border border-transparent hover:border-surface-800"
+                        title="Configurar & Monitorar"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <Settings className="w-4 h-4" />
                       </Link>
                       <button
                         className="p-2 text-surface-400 hover:text-accent-rose hover:bg-white rounded-lg transition-all shadow-sm border border-transparent hover:border-surface-800"

@@ -23,6 +23,7 @@ export async function updateTenant(id: string, data: any) {
 
     revalidatePath("/dashboard/persona");
     revalidatePath("/dashboard/integrations");
+    revalidatePath("/dashboard/users");
     return { success: true };
   } catch (error: any) {
     console.error("Erro ao atualizar perfil:", error);

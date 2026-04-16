@@ -138,8 +138,9 @@ export async function POST(request: NextRequest) {
           if (conversation.botEnabled && tenant.geminiKey) {
             console.log(`[🤖] Bot Ativado - Pensando na resposta para o Perfil: ${tenant.name}...`);
             
-            // Aqui a "Magia" ocorre: Módulo Geminis com as Prompts dinâmicas
+            // Aqui a "Magia" ocorre: Módulo Geminis com as Prompts dinâmicas e Pesquisa no DB
             const botReply = await generateBotResponse(
+               tenant.id,
                tenant.geminiKey,
                tenant.systemPrompt,
                content
