@@ -13,11 +13,13 @@ import {
   Check,
   CheckCheck,
   Loader2,
-  ChevronDown
+  ChevronDown,
+  Bot,
+  Zap
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { getConversations, getMessages, sendMessage } from "./inbox-actions";
+import { getConversations, getMessages, sendMessage, toggleBot } from "./inbox-actions";
 import { cn } from "@/lib/utils";
 
 export default function InboxPage() {
@@ -78,8 +80,23 @@ export default function InboxPage() {
     if (!result.success) {
       // Remover a mensagem temporária se falhar
       setMessages(prev => prev.filter(m => m.id !== tempMsg.id));
+    } else {
+      // Se enviou com sucesso, desativamos o robô automaticamente para este atendimento (Human-in-the-loop)
+      if (selectedConv.botEnabled) {
+        await handleToggleBot(false);
+      }
     }
     setSending(false);
+  };
+
+  const handleToggleBot = async (enabled: boolean) => {
+    if (!selectedConv) return;
+    
+    // Otimista
+    setSelectedConv({ ...selectedConv, botEnabled: enabled });
+    setConversations(prev => prev.map(c => c.id === selectedConv.id ? { ...c, botEnabled: enabled } : c));
+    
+    await toggleBot(selectedConv.id, enabled);
   };
 
   if (!activeTenant) {
@@ -214,17 +231,42 @@ export default function InboxPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button className="p-2.5 text-surface-500 hover:bg-brand-50 hover:text-brand-600 rounded-xl transition-all">
-                  <Phone className="w-4 h-4" />
-                </button>
-                <button className="p-2.5 text-surface-500 hover:bg-brand-50 hover:text-brand-600 rounded-xl transition-all">
-                  <Video className="w-4 h-4" />
-                </button>
-                <div className="w-px h-6 bg-surface-800 mx-2" />
-                <button className="p-2.5 text-surface-500 hover:bg-surface-950/20 rounded-xl transition-all">
-                  <MoreVertical className="w-4 h-4" />
-                </button>
+              <div className="flex items-center gap-6">
+                {/* Bot Switch */}
+                <div className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-2xl border transition-all",
+                  selectedConv.botEnabled 
+                    ? "bg-brand-50 border-brand-200 text-brand-600" 
+                    : "bg-surface-950/20 border-surface-800 text-surface-500"
+                )}>
+                  <Zap className={cn("w-4 h-4", selectedConv.botEnabled && "fill-brand-600")} />
+                  <span className="text-[10px] font-black uppercase tracking-widest leading-none">Robô</span>
+                  <button 
+                    onClick={() => handleToggleBot(!selectedConv.botEnabled)}
+                    className={cn(
+                      "relative w-10 h-5 rounded-full transition-all duration-300 ml-1",
+                      selectedConv.botEnabled ? "bg-brand-600" : "bg-surface-400"
+                    )}
+                  >
+                    <div className={cn(
+                      "absolute top-1 w-3 h-3 bg-white rounded-full transition-all duration-300",
+                      selectedConv.botEnabled ? "left-6" : "left-1"
+                    )} />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button className="p-2.5 text-surface-500 hover:bg-brand-50 hover:text-brand-600 rounded-xl transition-all">
+                    <Phone className="w-4 h-4" />
+                  </button>
+                  <button className="p-2.5 text-surface-500 hover:bg-brand-50 hover:text-brand-600 rounded-xl transition-all">
+                    <Video className="w-4 h-4" />
+                  </button>
+                  <div className="w-px h-6 bg-surface-800 mx-2" />
+                  <button className="p-2.5 text-surface-500 hover:bg-surface-950/20 rounded-xl transition-all">
+                    <MoreVertical className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 

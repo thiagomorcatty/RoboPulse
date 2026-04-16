@@ -62,3 +62,17 @@ export async function sendMessage(conversationId: string, content: string, userI
     return { success: false };
   }
 }
+
+export async function toggleBot(conversationId: string, enabled: boolean) {
+  try {
+    await prisma.conversation.update({
+      where: { id: conversationId },
+      data: { botEnabled: enabled },
+    });
+    revalidatePath("/dashboard/inbox");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao alternar bot:", error);
+    return { success: false };
+  }
+}

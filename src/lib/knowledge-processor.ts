@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import pdf from "pdf-parse";
 import mammoth from "mammoth";
 import { prisma } from "./db";
@@ -10,7 +11,6 @@ export async function processDocument(documentId: string) {
   console.log(`[Processor] Iniciando treinamento do documento: ${documentId}`);
   
   try {
-    // 1. Buscar o documento e o Tenant (precisamos da Gemini Key)
     const doc = await prisma.document.findUnique({
       where: { id: documentId },
       include: { tenant: true }
@@ -20,17 +20,13 @@ export async function processDocument(documentId: string) {
       throw new Error("Documento ou Tenant não encontrado");
     }
 
-    // Atualizar status para PROCESSING
     await prisma.document.update({
       where: { id: documentId },
       data: { status: "PROCESSING" }
     });
 
-    // 2. Extrair Buffer do Data URI ou URL
-    // No nosso caso atual, estamos salvando como Data URI no fileUrl
     const buffer = extractBufferFromDataUri(doc.fileUrl);
     
-    // 3. Extrair Texto
     let fullText = "";
     if (doc.fileType === "pdf") {
       const data = await pdf(buffer);
@@ -46,19 +42,13 @@ export async function processDocument(documentId: string) {
       throw new Error("Não foi possível extrair texto do documento.");
     }
 
-    // 4. Dividir em Chunks (1000 chars com 200 de overlap)
+    // Chunks dinâmicos respeitando pontuação
     const chunks = chunkText(fullText, 1000, 200);
-    console.log(`[Processor] ${chunks.length} chunks gerados para ${doc.fileName}`);
+    console.log(`[Processor] ${chunks.length} chunks inteligentes gerados para ${doc.fileName}`);
 
-    // 5. Gerar Embeddings e Salvar
-    // Se o Tenant não tiver chave própria, tentamos usar a global do sistema
     const apiKey = doc.tenant.geminiKey || process.env.GEMINI_API_KEY;
-    
-    if (!apiKey) {
-      throw new Error("Gemini API Key não configurada para este perfil ou sistema.");
-    }
+    if (!apiKey) throw new Error("Gemini API Key ausente");
 
-    // Limpar embeddings antigos se existirem (para re-treinamento)
     await prisma.documentEmbedding.deleteMany({
       where: { documentId: doc.id }
     });
@@ -67,31 +57,29 @@ export async function processDocument(documentId: string) {
       const embedding = await getEmbedding(chunk, apiKey);
       const vectorString = `[${embedding.join(",")}]`;
 
-      // Inserção via SQL Puro devido ao tipo 'vector' (pgvector)
-      await prisma.$executeRawUnsafe(`
+      // Inserção segura via Template Tags
+      await prisma.$executeRaw`
         INSERT INTO document_embeddings ("id", "tenantId", "documentId", "content", "embedding", "createdAt")
         VALUES (
-          '${crypto.randomUUID()}', 
-          '${doc.tenantId}', 
-          '${doc.id}', 
-          $1, 
-          '${vectorString}'::vector, 
+          ${crypto.randomUUID()}, 
+          ${doc.tenantId}, 
+          ${doc.id}, 
+          ${chunk}, 
+          ${vectorString}::vector, 
           NOW()
         )
-      `, chunk);
+      `;
     }
 
-    // 6. Finalizar
     await prisma.document.update({
       where: { id: documentId },
       data: { status: "READY" }
     });
 
-    console.log(`[Processor] Sucesso! Documento ${doc.fileName} está pronto para RAG.`);
+    console.log(`[Processor] Sucesso! Documento ${doc.fileName} pronto.`);
 
   } catch (error: any) {
-    console.error(`[Processor] Erro fatal no documento ${documentId}:`, error);
-    
+    console.error(`[Processor] Erro:`, error);
     await prisma.document.update({
       where: { id: documentId },
       data: { status: "ERROR" }
@@ -100,28 +88,41 @@ export async function processDocument(documentId: string) {
 }
 
 /**
- * Função utilitária para dividir texto em blocos menores com sobreposição.
+ * Divide o texto tentando quebrar em frases completas.
  */
 function chunkText(text: string, size: number, overlap: number): string[] {
   const chunks: string[] = [];
   const cleanText = text.replace(/\s+/g, " ").trim();
   
-  let i = 0;
-  while (i < cleanText.length) {
-    const end = Math.min(i + size, cleanText.length);
-    chunks.push(cleanText.substring(i, end));
-    i += (size - overlap);
+  let start = 0;
+  while (start < cleanText.length) {
+    let end = Math.min(start + size, cleanText.length);
     
-    // Evitar loops infinitos se o texto for muito curto ou os parâmetros estranhos
-    if (end === cleanText.length) break;
+    // Tentar encontrar um ponto final, interrogação ou exclamação próximo do fim para não cortar a frase
+    if (end < cleanText.length) {
+      const lastSentenceEnd = cleanText.lastIndexOf(". ", end);
+      const lastQuestion = cleanText.lastIndexOf("? ", end);
+      const lastExclamation = cleanText.lastIndexOf("! ", end);
+      
+      const bestEnd = Math.max(lastSentenceEnd, lastQuestion, lastExclamation);
+      
+      // Se encontrar um fim de frase nos últimos 20% do chunk, quebra ali
+      if (bestEnd > start + (size * 0.8)) {
+        end = bestEnd + 1;
+      }
+    }
+    
+    chunks.push(cleanText.substring(start, end).trim());
+    start = end - overlap;
+    
+    // Garantir progresso
+    if (start >= cleanText.length || end === cleanText.length) break;
+    if (start < 0) start = 0;
   }
   
   return chunks;
 }
 
-/**
- * Extrai o Buffer de uma string Base64 ou Data URI.
- */
 function extractBufferFromDataUri(dataUrl: string): Buffer {
   if (dataUrl.startsWith("data:")) {
     const base64 = dataUrl.split(",")[1];

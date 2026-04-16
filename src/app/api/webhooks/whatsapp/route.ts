@@ -24,166 +24,150 @@ export async function GET(request: NextRequest) {
 }
 
 // ============================================
-// POST: Incoming Messages & Status Updates
+// Lógica de Processamento (Assíncrona para não travar o Webhook)
 // ============================================
+async function processWebhookMessage(message: any, value: any, phoneNumberId: string) {
+  const from = message.from;
+  const messageId = message.id;
+  const messageType = message.type;
+  
+  let content = "";
+  if (messageType === "text") {
+    content = message.text?.body || "";
+  } else {
+    content = `[Mídia do tipo ${messageType}]`;
+  }
+
+  try {
+    // 1. LOCALIZAR O ATENDENTE (TENANT)
+    const tenant = await prisma.tenant.findFirst({
+      where: { whatsappPhoneId: phoneNumberId, isActive: true },
+      include: { users: true }
+    });
+
+    if (!tenant) return;
+
+    const tenantOwner = tenant.users.find(tu => tu.role === "OWNER") || tenant.users[0];
+    if (!tenantOwner) return;
+
+    // Idempotência
+    const msgDuplicada = await prisma.message.findUnique({ where: { waMessageId: messageId } });
+    if (msgDuplicada) return;
+
+    // 2. REGISTRAR CONTACTO
+    const contactName = value.contacts?.[0]?.profile?.name || from;
+    let contact = await prisma.contact.findFirst({
+      where: { waId: from, userId: tenantOwner.userId }
+    });
+
+    if (!contact) {
+      contact = await prisma.contact.create({
+        data: {
+          waId: from,
+          name: contactName,
+          userId: tenantOwner.userId,
+          tenantId: tenant.id
+        }
+      });
+    }
+
+    // 3. CONVERSAÇÃO
+    let conversation = await prisma.conversation.findFirst({
+      where: { contactId: contact.id, tenantId: tenant.id, status: "ACTIVE" }
+    });
+
+    if (!conversation) {
+      conversation = await prisma.conversation.create({
+        data: {
+          tenantId: tenant.id,
+          contactId: contact.id,
+          status: "ACTIVE",
+          botEnabled: true,
+        }
+      });
+    }
+
+    // 4. PERSISTIR MENSAGEM INBOUND
+    await prisma.message.create({
+      data: {
+        conversationId: conversation.id,
+        direction: "INBOUND",
+        content: content,
+        messageType: "TEXT",
+        waMessageId: messageId
+      }
+    });
+
+    // 5. RESPOSTA DO BOT (Se habilitado e configurado)
+    if (conversation.botEnabled && tenant.geminiKey) {
+      const botReply = await generateBotResponse(
+        tenant.id,
+        tenant.geminiKey,
+        tenant.systemPrompt,
+        content
+      );
+
+      // Se a IA retornar erro ou vazio, ficamos em silêncio (conforme pedido pelo USER)
+      if (!botReply || botReply.includes("Desculpe, meu cérebro digital")) {
+        console.log(`[🤖] Silêncio mantido para ${from} devido a falha ou resposta vazia da IA.`);
+        return;
+      }
+
+      if (tenant.whatsappToken) {
+        await sendWhatsAppMessage(phoneNumberId, tenant.whatsappToken, from, botReply);
+        
+        await prisma.message.create({
+          data: {
+            conversationId: conversation.id,
+            direction: "OUTBOUND",
+            content: botReply,
+            messageType: "TEXT"
+          }
+        });
+      }
+    }
+  } catch (error) {
+    console.error(`[Webhook Process error] Falha ao processar mensagem ${messageId}:`, error);
+    // Silent failure to maintain "humanized" busy look
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
     if (body.object !== "whatsapp_business_account") {
-      return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid payload" }, { status: 200 }); // Meta pede 200 mesmo em lixo
     }
 
+    // Resposta imediata para a Meta (Fast-Ack) para evitar retries
+    // No Next.js 15/16 podemos usar unstable_after se necessário, 
+    // mas aqui disparamos o processamento e respondemos.
+    
     const entries = body.entry || [];
-
     for (const entry of entries) {
-      const changes = entry.changes || [];
-
-      for (const change of changes) {
+      for (const change of (entry.changes || [])) {
         if (change.field !== "messages") continue;
-
+        
         const value = change.value;
-        const metadata = value.metadata;
-        const phoneNumberId = metadata?.phone_number_id;
+        const phoneNumberId = value.metadata?.phone_number_id;
 
-        // Verifica Status das mensagens enviadas (Entregue/Lida) e finaliza o loop
-        const statuses = value.statuses || [];
-        for (const status of statuses) {
+        // Processa Status (Update silencioso)
+        for (const status of (value.statuses || [])) {
           console.log(`[Meta Status] ${status.id} -> ${status.status}`);
         }
 
-        // Processa Mensagens Recebidas (Inbound)
-        const messages = value.messages || [];
-        for (const message of messages) {
-          const from = message.from; // Sender's WhatsApp number (Lead)
-          const messageId = message.id;
-          const messageType = message.type;
-          
-          // Tratamento inicial pra texto. No futuro, expandir para mídias (áudio, foto)
-          let content = "";
-          if (messageType === "text") {
-            content = message.text?.body || "";
-          } else {
-            content = `[Mídia do tipo ${messageType} pendente de transcrição]`;
-          }
-
-          console.log(`[Inbound] Nova msg de ${from} p/ ID ${phoneNumberId}: ${content}`);
-
-          // --- 1. LOCALIZAR O ATENDENTE (TENANT) PROPRIETÁRIO DO BOT ---
-          const tenant = await prisma.tenant.findFirst({
-            where: { whatsappPhoneId: phoneNumberId, isActive: true },
-            include: { users: true }
-          });
-
-          if (!tenant) {
-            console.error(`[Aviso] Nenhuma conta/perfil ativa vinculada ao Phone ID: ${phoneNumberId}`);
-            continue;
-          }
-
-          // Pegamos o Dono deste Atendente (Admin do sistema do cliente logado)
-          const tenantOwner = tenant.users.find(tu => tu.role === "OWNER") || tenant.users[0];
-          if (!tenantOwner) continue;
-
-          // Evitar processamento de mensagens duplicadas (idempotência)
-          const msgDuplicada = await prisma.message.findUnique({ where: { waMessageId: messageId } });
-          if (msgDuplicada) continue;
-
-          // --- 2. REGISTRAR O CONTACTO (LEAD) ---
-          const contactName = value.contacts?.[0]?.profile?.name || from;
-          
-          let contact = await prisma.contact.findFirst({
-            where: { waId: from, userId: tenantOwner.userId }
-          });
-
-          if (!contact) {
-            contact = await prisma.contact.create({
-              data: {
-                waId: from,
-                name: contactName,
-                userId: tenantOwner.userId,
-                tenantId: tenant.id
-              }
-            });
-            console.log(`[Nova Lead] Contato ${contactName} salvo!`);
-          }
-
-          // --- 3. CONECTAR OU ABRIR NOVA CONVERSAÇÃO ATIVA ---
-          let conversation = await prisma.conversation.findFirst({
-            where: { contactId: contact.id, tenantId: tenant.id, status: "ACTIVE" }
-          });
-
-          if (!conversation) {
-            conversation = await prisma.conversation.create({
-              data: {
-                tenantId: tenant.id,
-                contactId: contact.id,
-                status: "ACTIVE",
-                botEnabled: true,
-              }
-            });
-          }
-
-          // --- 4. PERSISTIR A MENSAGEM INBOUND NA TIMELINE ---
-          await prisma.message.create({
-            data: {
-              conversationId: conversation.id,
-              direction: "INBOUND",
-              content: content,
-              messageType: "TEXT",
-              waMessageId: messageId
-            }
-          });
-
-          // --- 5. RAG / GEMINI: DEVOLVER RESPOSTA DO BOT SE ATIVADO ---
-          if (conversation.botEnabled && tenant.geminiKey) {
-            console.log(`[🤖] Bot Ativado - Pensando na resposta para o Perfil: ${tenant.name}...`);
-            
-            // Aqui a "Magia" ocorre: Módulo Geminis com as Prompts dinâmicas e Pesquisa no DB
-            const botReply = await generateBotResponse(
-               tenant.id,
-               tenant.geminiKey,
-               tenant.systemPrompt,
-               content
-            );
-
-            if (tenant.whatsappToken) {
-               // Disparo oficial com o Cartão Meta
-               try {
-                 await sendWhatsAppMessage(
-                   phoneNumberId,
-                   tenant.whatsappToken,
-                   from,
-                   botReply
-                 );
-                 
-                 // Persistir a Resposta do robô na Timeline Outbound
-                 await prisma.message.create({
-                   data: {
-                     conversationId: conversation.id,
-                     direction: "OUTBOUND",
-                     content: botReply,
-                     messageType: "TEXT"
-                     // Outbound bots geralmente não têm waMessageId estrito até o callback, deixando null
-                   }
-                  });
-               } catch (e) {
-                 console.error("[Disparo Oficial Meta] Falha crítica de conexão:", e);
-               }
-            } else {
-               console.warn(`[Configuração Incompleta] O Perfil ${tenant.name} tem IA ligada, mas o Token do WhatsApp não está preenchido.`);
-            }
-          }
+        // Processa Mensagens (Trigger assíncrono)
+        for (const message of (value.messages || [])) {
+          // Chamada sem await para liberar o Webhook
+          processWebhookMessage(message, value, phoneNumberId).catch(console.error);
         }
       }
     }
 
-    // Serverless Acknowledgment - Responder HTTP 200 no final do ciclo
-    return NextResponse.json({ status: "ok" }, { status: 200 });
+    return NextResponse.json({ status: "accepted" }, { status: 200 });
   } catch (error) {
-    console.error("[WhatsApp Webhook Critical] Ocorreu uma exceção no loop principal:", error);
-    return NextResponse.json(
-      { error: "Internal server error no processamento" },
-      { status: 500 }
-    );
+    console.error("[WhatsApp Webhook Critical]:", error);
+    return NextResponse.json({ status: "error" }, { status: 200 });
   }
 }
